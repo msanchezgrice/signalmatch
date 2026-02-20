@@ -1,7 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowLeft, ArrowRight, Info } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -9,6 +11,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const schema = z.object({
   product_id: z.string().uuid(),
@@ -25,9 +28,11 @@ const schema = z.object({
 });
 
 type FormData = any;
+type Step = 1 | 2;
 
 export function CampaignForm({ products }: { products: Array<{ id: string; name: string }> }) {
   const router = useRouter();
+  const [step, setStep] = useState<Step>(1);
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -73,45 +78,107 @@ export function CampaignForm({ products }: { products: Array<{ id: string; name:
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      <div>
-        <p className="mb-1 text-sm text-zinc-600">Product</p>
-        <select className="w-full rounded-md border bg-white p-2" {...form.register("product_id")}>
-          {products.map((product) => (
-            <option key={product.id} value={product.id}>
-              {product.name}
-            </option>
-          ))}
-        </select>
+      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+        Step {step} of 2
       </div>
-      <Input placeholder="Campaign title" {...form.register("title")} />
-      <Textarea placeholder="Brief" rows={4} {...form.register("brief")} />
-      <Input placeholder="Target tags (comma-separated)" {...form.register("target_tags_csv")} />
-      <div className="grid gap-4 md:grid-cols-2">
-        <Input placeholder="conversion_type" {...form.register("conversion_type")} />
-        <Input placeholder="approval_mode" {...form.register("approval_mode")} />
-      </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        <Input placeholder="CPA cents" type="number" {...form.register("cpa_amount_cents")} />
-        <Input
-          placeholder="Budget total cents"
-          type="number"
-          {...form.register("budget_total_cents")}
-        />
-        <Input
-          placeholder="Budget available cents"
-          type="number"
-          {...form.register("budget_available_cents")}
-        />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Input
-          placeholder="Approval timeout days"
-          type="number"
-          {...form.register("approval_timeout_days")}
-        />
-        <Input placeholder="status" {...form.register("status")} />
-      </div>
-      <Button type="submit">Create campaign</Button>
+
+      {step === 1 ? (
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium">Product</label>
+            <select className="w-full rounded-md border bg-white p-2" {...form.register("product_id")}>
+              {products.map((product) => (
+                <option key={product.id} value={product.id}>
+                  {product.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Campaign title</label>
+            <Input placeholder="Get qualified AI founders to signup" {...form.register("title")} />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Campaign brief</label>
+            <Textarea placeholder="Describe who to target and what counts as success." rows={4} {...form.register("brief")} />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">Target tags</label>
+            <Input placeholder="founders, ai-devtools" {...form.register("target_tags_csv")} />
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Conversion type</label>
+              <select className="w-full rounded-md border bg-white p-2" {...form.register("conversion_type")}>
+                <option value="signup">Signup</option>
+                <option value="activation">Activation</option>
+              </select>
+            </div>
+            <div>
+              <label className="mb-1 flex items-center gap-1.5 text-sm font-medium">
+                Approval mode
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="text-zinc-500 hover:text-zinc-800">
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    Use manual mode for initial quality control; auto mode approves immediately when events arrive.
+                  </TooltipContent>
+                </Tooltip>
+              </label>
+              <select className="w-full rounded-md border bg-white p-2" {...form.register("approval_mode")}>
+                <option value="manual">Manual</option>
+                <option value="auto">Auto</option>
+              </select>
+            </div>
+          </div>
+          <Button type="button" onClick={() => setStep(2)}>
+            Continue
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="mb-1 block text-sm font-medium">CPA amount (cents)</label>
+              <Input type="number" {...form.register("cpa_amount_cents")} />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Budget total (cents)</label>
+              <Input type="number" {...form.register("budget_total_cents")} />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Budget available (cents)</label>
+              <Input type="number" {...form.register("budget_available_cents")} />
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Approval timeout days</label>
+              <Input type="number" {...form.register("approval_timeout_days")} />
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium">Campaign status</label>
+              <select className="w-full rounded-md border bg-white p-2" {...form.register("status")}>
+                <option value="draft">Draft</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="ended">Ended</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" variant="outline" onClick={() => setStep(1)}>
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            <Button type="submit">Create campaign</Button>
+          </div>
+        </div>
+      )}
     </form>
   );
 }

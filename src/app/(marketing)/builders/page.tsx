@@ -47,7 +47,7 @@ export default function BuildersPage() {
           You only pay for approved conversions, not impressions.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/app">
+          <Link href="/app/onboarding?role=BUILDER">
             <Button size="lg">Create a campaign</Button>
           </Link>
           <Link href="/explore/creators">

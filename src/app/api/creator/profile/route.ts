@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireRole } from "@/server/auth";
+import { requireCreator } from "@/server/auth";
 import { upsertCreatorProfile } from "@/server/db/write";
 import { creatorProfileSchema } from "@/server/lib/validators";
 
 export async function POST(req: NextRequest) {
   try {
-    const authContext = await requireRole(["CREATOR", "ADMIN"]);
+    const authContext = await requireCreator();
     const json = await req.json();
     const parsed = creatorProfileSchema.safeParse(json);
 

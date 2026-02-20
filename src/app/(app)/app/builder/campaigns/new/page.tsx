@@ -8,8 +8,12 @@ import { getBuilderProducts } from "@/server/db/read";
 export default async function NewCampaignPage() {
   const authContext = await getAuthContext();
 
-  if (!authContext || (authContext.role !== "BUILDER" && authContext.role !== "ADMIN")) {
-    redirect("/app/onboarding");
+  if (!authContext) {
+    redirect("/");
+  }
+
+  if (authContext.role !== "BUILDER") {
+    redirect("/app");
   }
 
   const products = await getBuilderProducts(authContext.userId);
@@ -24,6 +28,10 @@ export default async function NewCampaignPage() {
         <CardTitle>Create campaign</CardTitle>
       </CardHeader>
       <CardContent>
+        <p className="mb-4 text-sm text-zinc-600">
+          Use the guided setup to define conversion quality, approval controls,
+          and budget constraints before inviting creators.
+        </p>
         <CampaignForm products={products as Array<{ id: string; name: string }>} />
       </CardContent>
     </Card>

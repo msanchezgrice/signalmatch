@@ -9,8 +9,12 @@ import { getBuilderCampaigns } from "@/server/db/read";
 export default async function BuilderCampaignsPage() {
   const authContext = await getAuthContext();
 
-  if (!authContext || (authContext.role !== "BUILDER" && authContext.role !== "ADMIN")) {
-    redirect("/app/onboarding");
+  if (!authContext) {
+    redirect("/");
+  }
+
+  if (authContext.role !== "BUILDER") {
+    redirect("/app");
   }
 
   const campaigns = await getBuilderCampaigns(authContext.userId);

@@ -12,6 +12,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect("/");
   }
 
+  const navLinks =
+    authContext.role === "BUILDER"
+      ? [
+          { href: "/app/builder/start", label: "Overview" },
+          { href: "/app/builder/products", label: "Products" },
+          { href: "/app/builder/campaigns", label: "Campaigns" },
+        ]
+      : authContext.role === "CREATOR"
+        ? [
+            { href: "/app/creator/start", label: "Overview" },
+            { href: "/app/creator/profile", label: "Profile" },
+            { href: "/app/creator/partnerships", label: "Partnerships" },
+            { href: "/app/creator/deals", label: "Deals" },
+            { href: "/app/creator/payouts", label: "Payouts" },
+          ]
+        : [{ href: "/app/onboarding", label: "Get Started" }];
+
   return (
     <div className="min-h-screen">
       <header className="border-b border-zinc-200/70 bg-white/90 backdrop-blur">
@@ -20,11 +37,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/" className="font-semibold">
               SignalMatch
             </Link>
-            <Link href="/app">Home</Link>
-            <Link href="/app/onboarding">Role</Link>
-            <Link href="/app/builder/campaigns">Builder</Link>
-            <Link href="/app/creator/partnerships">Creator</Link>
-            <Link href="/app/admin">Admin</Link>
+            {navLinks.map((link) => (
+              <Link key={link.href} href={link.href}>
+                {link.label}
+              </Link>
+            ))}
           </div>
           <UserButton />
         </div>

@@ -1,4 +1,4 @@
-export type UserRole = "CREATOR" | "BUILDER" | "ADMIN";
+export type UserRole = "CREATOR" | "BUILDER";
 
 export type CreatorDirectoryItem = {
   creator_profile_id: string;

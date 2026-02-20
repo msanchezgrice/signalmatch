@@ -55,6 +55,24 @@ const campaignExamples = [
   },
 ];
 
+const caseStudies = [
+  {
+    brand: "AgentOps Tooling Co.",
+    result: "+38% qualified signups in 30 days",
+    detail: "Switched from flat sponsorships to CPA invites with manual approvals for quality control.",
+  },
+  {
+    brand: "AI Sales Assistant",
+    result: "2.7x better CAC payback",
+    detail: "Focused on creator audiences with RevOps fit and paid only for activated trial accounts.",
+  },
+  {
+    brand: "Research Workflow SaaS",
+    result: "$18.4k attributed pipeline",
+    detail: "Used ref-code attribution to connect creator content directly to conversion performance.",
+  },
+];
+
 export default function HomePage() {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-10 px-4 py-16 md:space-y-14 md:px-8 md:py-24">
@@ -63,7 +81,7 @@ export default function HomePage() {
           SignalMatch Marketplace
         </Badge>
         <h1 className="max-w-4xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-          Performance partnerships for AI products and trusted creators.
+          High-trust performance growth for AI products and creator channels.
         </h1>
         <p className="mt-5 max-w-3xl text-lg text-zinc-600 md:text-xl">
           SignalMatch connects builders and AI curators in one CPA workflow:
@@ -71,7 +89,7 @@ export default function HomePage() {
           single dashboard.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link href="/app">
+          <Link href="/app/onboarding">
             <Button size="lg">Start in dashboard</Button>
           </Link>
           <Link href="/explore/creators">
@@ -161,6 +179,26 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section>
+        <div className="mb-4">
+          <Badge className="bg-primary/15 text-primary hover:bg-primary/20">Case studies</Badge>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight">Performance snapshots</h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {caseStudies.map((study) => (
+            <Card key={study.brand} className="border-zinc-200/80 bg-white/95">
+              <CardHeader>
+                <CardTitle className="text-lg">{study.brand}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm text-zinc-600">
+                <p className="font-medium text-zinc-900">{study.result}</p>
+                <p>{study.detail}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
       <section className="grid gap-4 md:grid-cols-2">
         {[
           [
@@ -207,7 +245,7 @@ export default function HomePage() {
           <CardContent className="space-y-4 text-sm text-zinc-300">
             <p>Set up your role, complete your profile, and run a live campaign in minutes.</p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/app">
+              <Link href="/app/onboarding">
                 <Button size="lg">Go to dashboard</Button>
               </Link>
               <Link href="/builders">

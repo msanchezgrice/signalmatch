@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 
 import { env } from "@/server/env";
-import { requireRole } from "@/server/auth";
+import { requireCreator } from "@/server/auth";
 import { getCreatorProfileByUserId } from "@/server/db/read";
 import { setCreatorStripeAccount } from "@/server/db/write";
 import { stripe } from "@/server/stripe";
 
 export async function POST() {
   try {
-    const authContext = await requireRole(["CREATOR", "ADMIN"]);
+    const authContext = await requireCreator();
     const profile = await getCreatorProfileByUserId(authContext.userId);
 
     if (!profile) {

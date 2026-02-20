@@ -7,8 +7,12 @@ import { getCreatorDeals } from "@/server/db/read";
 export default async function CreatorDealsPage() {
   const authContext = await getAuthContext();
 
-  if (!authContext || (authContext.role !== "CREATOR" && authContext.role !== "ADMIN")) {
-    redirect("/app/onboarding");
+  if (!authContext) {
+    redirect("/");
+  }
+
+  if (authContext.role !== "CREATOR") {
+    redirect("/app");
   }
 
   const deals = await getCreatorDeals(authContext.userId);

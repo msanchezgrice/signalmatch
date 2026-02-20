@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { sql } from "@/server/db";
-import { requireRole } from "@/server/auth";
+import { requireBuilder } from "@/server/auth";
 import { createCampaign } from "@/server/db/write";
 import { campaignSchema } from "@/server/lib/validators";
 
 export async function POST(req: NextRequest) {
   try {
-    const authContext = await requireRole(["BUILDER", "ADMIN"]);
+    const authContext = await requireBuilder();
     const json = await req.json();
     const parsed = campaignSchema.safeParse(json);
 

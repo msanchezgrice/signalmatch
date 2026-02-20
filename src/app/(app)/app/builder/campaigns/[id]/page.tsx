@@ -16,14 +16,18 @@ type Props = { params: Promise<{ id: string }> };
 export default async function BuilderCampaignDetailPage({ params }: Props) {
   const authContext = await getAuthContext();
 
-  if (!authContext || (authContext.role !== "BUILDER" && authContext.role !== "ADMIN")) {
-    redirect("/app/onboarding");
+  if (!authContext) {
+    redirect("/");
+  }
+
+  if (authContext.role !== "BUILDER") {
+    redirect("/app");
   }
 
   const { id } = await params;
   const campaign = await getCampaignById(id);
 
-  if (!campaign || (campaign.owner_user_id !== authContext.userId && authContext.role !== "ADMIN")) {
+  if (!campaign || campaign.owner_user_id !== authContext.userId) {
     notFound();
   }
 

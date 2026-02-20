@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { requireRole } from "@/server/auth";
+import { requireCreator } from "@/server/auth";
 import { acceptPartnership } from "@/server/db/write";
 
 export async function POST(
@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const authContext = await requireRole(["CREATOR", "ADMIN"]);
+    const authContext = await requireCreator();
 
     const partnership = await acceptPartnership(id, authContext.userId);
     if (!partnership) {

@@ -12,8 +12,8 @@ export default async function CreatorProfilePage() {
     redirect("/");
   }
 
-  if (authContext.role !== "CREATOR" && authContext.role !== "ADMIN") {
-    redirect("/app/onboarding");
+  if (authContext.role !== "CREATOR") {
+    redirect("/app");
   }
 
   const profile = await getCreatorProfileByUserId(authContext.userId);
@@ -24,6 +24,9 @@ export default async function CreatorProfilePage() {
         <CardTitle>Creator profile</CardTitle>
       </CardHeader>
       <CardContent>
+        <p className="mb-4 text-sm text-zinc-600">
+          Complete this in two steps so builders can match you to high-fit campaigns.
+        </p>
         <CreatorProfileForm defaults={profile as any} />
       </CardContent>
     </Card>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { sql } from "@/server/db";
-import { requireRole } from "@/server/auth";
+import { requireBuilder } from "@/server/auth";
 import { newApiKey } from "@/server/crypto";
 import { rotateProductApiKey } from "@/server/db/write";
 
@@ -11,7 +11,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const authContext = await requireRole(["BUILDER", "ADMIN"]);
+    const authContext = await requireBuilder();
 
     const ownership = await sql(
       `select id from products where id = $1 and owner_user_id = $2 limit 1`,

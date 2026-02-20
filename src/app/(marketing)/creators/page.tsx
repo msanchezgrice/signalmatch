@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const creatorSteps = [
-  "Choose creator role and complete your profile.",
+  "Complete your creator profile and audience fit.",
   "Add channels, audience fit, and content niches.",
   "Accept campaign invites with terms you agree with.",
   "Share your unique referral link where your audience already trusts you.",
@@ -31,7 +31,7 @@ export default function CreatorsPage() {
           You can see terms upfront, accept selectively, and monetize high-intent audience trust.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <Link href="/app">
+          <Link href="/app/onboarding?role=CREATOR">
             <Button size="lg">Create creator profile</Button>
           </Link>
           <Link href="/explore/campaigns">

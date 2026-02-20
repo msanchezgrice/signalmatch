@@ -22,7 +22,7 @@ export async function deleteUserByClerkId(clerkUserId: string) {
   await sql(`delete from users where clerk_user_id = $1`, [clerkUserId]);
 }
 
-export async function setUserRole(userId: string, role: "CREATOR" | "BUILDER" | "ADMIN") {
+export async function setUserRole(userId: string, role: "CREATOR" | "BUILDER") {
   await sql(`update users set role = $2 where id = $1`, [userId, role]);
 }
 

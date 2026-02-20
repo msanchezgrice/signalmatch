@@ -7,8 +7,12 @@ import { getAuthContext } from "@/server/auth";
 export default async function NewProductPage() {
   const authContext = await getAuthContext();
 
-  if (!authContext || (authContext.role !== "BUILDER" && authContext.role !== "ADMIN")) {
-    redirect("/app/onboarding");
+  if (!authContext) {
+    redirect("/");
+  }
+
+  if (authContext.role !== "BUILDER") {
+    redirect("/app");
   }
 
   return (
@@ -17,6 +21,10 @@ export default async function NewProductPage() {
         <CardTitle>Create product</CardTitle>
       </CardHeader>
       <CardContent>
+        <p className="mb-4 text-sm text-zinc-600">
+          Start with your website URL to auto-extract messaging, category tags,
+          and likely target personas.
+        </p>
         <ProductForm />
       </CardContent>
     </Card>

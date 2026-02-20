@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireRole } from "@/server/auth";
+import { requireBuilder } from "@/server/auth";
 import { createProduct } from "@/server/db/write";
 import { productSchema } from "@/server/lib/validators";
 
 export async function POST(req: NextRequest) {
   try {
-    const authContext = await requireRole(["BUILDER", "ADMIN"]);
+    const authContext = await requireBuilder();
     const json = await req.json();
     const parsed = productSchema.safeParse(json);
 

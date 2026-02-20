@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { requireRole } from "@/server/auth";
+import { requireBuilder } from "@/server/auth";
 import { markConversionApproved } from "@/server/db/write";
 import { settlePayoutIfPossible } from "@/server/lib/payouts";
 
@@ -10,7 +10,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const authContext = await requireRole(["BUILDER", "ADMIN"]);
+    const authContext = await requireBuilder();
     const result = await markConversionApproved(id, authContext.userId);
 
     if (!result) {

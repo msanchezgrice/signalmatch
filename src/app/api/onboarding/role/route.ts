@@ -10,8 +10,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = roleSchema.safeParse(body.role);
 
-    if (!parsed.success || parsed.data === "ADMIN") {
+    if (!parsed.success) {
       return NextResponse.json({ ok: false, error: "Invalid role" }, { status: 400 });
+    }
+
+    if (authContext.role && authContext.role !== parsed.data) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Role already set for this account. Use a separate account for the other workspace.",
+        },
+        { status: 409 },
+      );
     }
 
     await setUserRole(authContext.userId, parsed.data);

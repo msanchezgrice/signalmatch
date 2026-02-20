@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { env } from "@/server/env";
 import { sql } from "@/server/db";
-import { requireRole } from "@/server/auth";
+import { requireBuilder } from "@/server/auth";
 import { stripe } from "@/server/stripe";
 
 export async function POST(
@@ -11,7 +11,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const authContext = await requireRole(["BUILDER", "ADMIN"]);
+    const authContext = await requireBuilder();
     const json = await req.json();
     const amountCents = Number(json.amount_cents ?? 0);
 

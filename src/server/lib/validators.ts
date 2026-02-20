@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const roleSchema = z.enum(["CREATOR", "BUILDER", "ADMIN"]);
+export const roleSchema = z.enum(["CREATOR", "BUILDER"]);
 
 export const creatorProfileSchema = z.object({
   display_name: z.string().min(2),

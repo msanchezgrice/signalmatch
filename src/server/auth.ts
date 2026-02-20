@@ -42,6 +42,26 @@ export async function requireRole(roles: UserRole[]) {
   return context;
 }
 
+export async function requireBuilder() {
+  return requireRole(["BUILDER"]);
+}
+
+export async function requireCreator() {
+  return requireRole(["CREATOR"]);
+}
+
+export function dashboardPathForRole(role: UserRole | null | undefined) {
+  if (role === "BUILDER") {
+    return "/app/builder/start";
+  }
+
+  if (role === "CREATOR") {
+    return "/app/creator/start";
+  }
+
+  return "/app/onboarding";
+}
+
 export async function getAuthContextFromClerkId(clerkUserId: string) {
   const user = await findUserByClerkId(clerkUserId);
 
