@@ -146,6 +146,7 @@ function inferPersonas(corpus: string) {
 export type SiteAnalysis = {
   input_url: string;
   final_url: string;
+  source: "direct" | "fallback";
   title: string | null;
   summary: string | null;
   key_points: string[];
@@ -153,48 +154,135 @@ export type SiteAnalysis = {
   target_personas: Array<{ name: string; rationale: string }>;
 };
 
-export async function analyzeSite(url: string): Promise<SiteAnalysis> {
+async function tryFetch(url: string, headers?: Record<string, string>) {
   const response = await fetch(url, {
     redirect: "follow",
     signal: AbortSignal.timeout(10_000),
-    headers: {
-      "user-agent":
-        "SignalMatchAnalyzer/1.0 (+https://www.signalmatch.me)",
-      accept: "text/html,application/xhtml+xml",
-    },
+    headers,
   });
 
   if (!response.ok) {
     throw new Error(`Could not fetch website (${response.status})`);
   }
 
-  const html = await response.text();
-  const title = extractFirstMatch(html, /<title[^>]*>([\s\S]*?)<\/title>/i);
-  const description =
-    extractFirstMatch(
-      html,
-      /<meta[^>]+name=["']description["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
-    ) ??
-    extractFirstMatch(
-      html,
-      /<meta[^>]+property=["']og:description["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
-    );
+  return {
+    finalUrl: response.url,
+    body: await response.text(),
+  };
+}
 
-  const headings = extractMany(html, /<h[12][^>]*>([\s\S]*?)<\/h[12]>/gi, 6);
-  const listItems = extractMany(html, /<li[^>]*>([\s\S]*?)<\/li>/gi, 8);
+async function fetchWebsiteContent(inputUrl: string) {
+  const url = new URL(inputUrl);
+  const httpUrl =
+    url.protocol === "https:" ? `http://${url.host}${url.pathname}${url.search}` : inputUrl;
+  const jinaUrl = `https://r.jina.ai/http://${url.host}${url.pathname}${url.search}`;
 
-  const keyPoints = [...headings, ...listItems]
-    .map((value) => value.trim())
-    .filter((value) => value.length >= 8)
+  const directHeaders = {
+    "user-agent": "SignalMatchAnalyzer/1.0 (+https://www.signalmatch.me)",
+    accept: "text/html,application/xhtml+xml",
+  };
+
+  const attempts: Array<{
+    url: string;
+    source: "direct" | "fallback";
+    headers?: Record<string, string>;
+  }> = [
+    { url: inputUrl, source: "direct", headers: directHeaders },
+    { url: inputUrl, source: "direct" },
+  ];
+
+  if (httpUrl !== inputUrl) {
+    attempts.push({ url: httpUrl, source: "direct", headers: directHeaders });
+    attempts.push({ url: httpUrl, source: "direct" });
+  }
+
+  attempts.push({ url: jinaUrl, source: "fallback" });
+
+  let lastError: Error | null = null;
+  for (const attempt of attempts) {
+    try {
+      const result = await tryFetch(attempt.url, attempt.headers);
+      return {
+        ...result,
+        source: attempt.source,
+      };
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("Fetch failed");
+    }
+  }
+
+  throw lastError ?? new Error("Could not fetch website");
+}
+
+function parsePlainTextFallback(body: string) {
+  const lines = body
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const title =
+    lines.find((line) => line.startsWith("Title:"))?.replace(/^Title:\s*/, "") ??
+    lines[0] ??
+    null;
+
+  const summaryCandidate = lines.find(
+    (line) =>
+      !line.startsWith("Title:") &&
+      !line.startsWith("URL Source:") &&
+      !line.startsWith("Markdown Content:") &&
+      line.length > 40,
+  );
+
+  const keyPoints = lines
+    .filter((line) => line.length > 20)
     .slice(0, 6);
 
-  const corpus = [title, description, ...headings, ...listItems]
-    .filter(Boolean)
-    .join(" ");
+  return {
+    title,
+    summary: summaryCandidate ?? null,
+    keyPoints,
+    corpus: [title, summaryCandidate, ...keyPoints].filter(Boolean).join(" "),
+  };
+}
+
+export async function analyzeSite(url: string): Promise<SiteAnalysis> {
+  const { body, finalUrl, source } = await fetchWebsiteContent(url);
+  const looksLikeHtml = /<html|<title|<h1|<meta/i.test(body);
+  const fallback = looksLikeHtml ? null : parsePlainTextFallback(body);
+
+  const title = looksLikeHtml
+    ? extractFirstMatch(body, /<title[^>]*>([\s\S]*?)<\/title>/i)
+    : fallback?.title ?? null;
+
+  const description = looksLikeHtml
+    ? extractFirstMatch(
+        body,
+        /<meta[^>]+name=["']description["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
+      ) ??
+      extractFirstMatch(
+        body,
+        /<meta[^>]+property=["']og:description["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
+      )
+    : fallback?.summary ?? null;
+
+  const headings = looksLikeHtml ? extractMany(body, /<h[12][^>]*>([\s\S]*?)<\/h[12]>/gi, 6) : [];
+  const listItems = looksLikeHtml ? extractMany(body, /<li[^>]*>([\s\S]*?)<\/li>/gi, 8) : [];
+
+  const keyPoints = looksLikeHtml
+    ? [...headings, ...listItems]
+        .map((value) => value.trim())
+        .filter((value) => value.length >= 8)
+        .slice(0, 6)
+    : fallback?.keyPoints ?? [];
+
+  const corpus = looksLikeHtml
+    ? [title, description, ...headings, ...listItems].filter(Boolean).join(" ")
+    : fallback?.corpus ?? "";
 
   return {
     input_url: url,
-    final_url: response.url,
+    final_url: finalUrl,
+    source,
     title,
     summary: description ?? null,
     key_points: keyPoints,
