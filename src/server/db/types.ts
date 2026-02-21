@@ -1,11 +1,22 @@
 export type UserRole = "CREATOR" | "BUILDER";
 
+export type CreatorChannel = {
+  platform: string;
+  handle?: string;
+  url?: string;
+  followers: number;
+  avg_impressions: number;
+};
+
 export type CreatorDirectoryItem = {
   creator_profile_id: string;
   user_id: string;
   display_name: string;
+  bio: string | null;
+  avatar_url: string | null;
   niches: string[];
-  channels: Array<{ platform: string; followers: number; avg_impressions: number }>;
+  audience_tags: string[];
+  channels: CreatorChannel[];
   verification_status: "verified" | "unverified";
 };
 

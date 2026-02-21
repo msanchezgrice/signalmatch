@@ -54,12 +54,20 @@ export async function getCreatorDirectory(filters: DirectoryFilters) {
       cp.id as creator_profile_id,
       cp.user_id,
       cp.display_name,
+      cp.bio,
+      cp.avatar_url,
       cp.niches,
+      cp.audience_tags,
       cp.channels,
       cp.verification_status
     from creator_profiles cp
     where
-      ($1::text is null or cp.display_name ilike '%' || $1 || '%')
+      cp.avatar_url is not null
+      and cp.bio is not null
+      and length(trim(cp.bio)) > 0
+      and coalesce(array_length(cp.niches, 1), 0) > 0
+      and jsonb_array_length(cp.channels) > 0
+      and ($1::text is null or cp.display_name ilike '%' || $1 || '%')
       and (
         coalesce(array_length($2::text[], 1), 0) = 0
         or cp.niches && $2::text[]
