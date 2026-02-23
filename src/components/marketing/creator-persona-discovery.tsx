@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,13 +20,14 @@ export function CreatorPersonaDiscovery() {
   const [platform, setPlatform] = useState<Platform>("linkedin");
   const [profileUrl, setProfileUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [statusText, setStatusText] = useState<string | null>(null);
 
   const placeholder = useMemo(
     () => platforms.find((item) => item.id === platform)?.example ?? "https://",
     [platform],
   );
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const value = profileUrl.trim();
@@ -33,13 +36,39 @@ export function CreatorPersonaDiscovery() {
       return;
     }
 
-    const query = new URLSearchParams({
-      source_platform: platform,
-      source_profile: value,
-    });
+    try {
+      new URL(value);
+    } catch {
+      toast.error("Please enter a full profile URL including https://");
+      return;
+    }
 
     setIsSubmitting(true);
-    router.push(`/creators/sign-up?${query.toString()}`);
+    setStatusText("Reading your profile...");
+
+    try {
+      const res = await fetch("/api/public/creator-profile-analyzer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: value, platform }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok || !json?.prefill_token) {
+        throw new Error(json?.error || "Could not analyze profile");
+      }
+
+      const query = new URLSearchParams({
+        prefill: json.prefill_token,
+      });
+
+      router.push(`/creators/sign-up?${query.toString()}`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not analyze profile");
+      setStatusText(null);
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -66,6 +95,7 @@ export function CreatorPersonaDiscovery() {
                     ? "border-blue-400 bg-blue-50 text-blue-700"
                     : "border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300"
                 }`}
+                disabled={isSubmitting}
               >
                 {item.label}
               </button>
@@ -80,15 +110,25 @@ export function CreatorPersonaDiscovery() {
             placeholder={placeholder}
             className="h-12 rounded-xl border-zinc-200 bg-white text-base"
             inputMode="url"
+            disabled={isSubmitting}
           />
           <Button
             type="submit"
             disabled={isSubmitting || profileUrl.trim().length === 0}
             className="h-12 min-w-40 rounded-xl"
           >
-            {isSubmitting ? "Analyzing" : "Analyze profile"}
+            {isSubmitting ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Analyzing
+              </span>
+            ) : (
+              "Analyze profile"
+            )}
           </Button>
         </div>
+
+        {statusText ? <p className="text-sm text-zinc-600">{statusText}</p> : null}
 
         <p className="text-sm text-zinc-500">
           Tip: paste a full profile URL (including <code>https://</code>) for best results.

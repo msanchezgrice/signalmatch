@@ -79,7 +79,24 @@ const proofLinks = [
   },
 ];
 
-export default function CreatorSignUpPage() {
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function CreatorSignUpPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const prefill =
+    typeof params.prefill === "string" && params.prefill.length > 0
+      ? params.prefill
+      : null;
+  const encodedPrefill = prefill ? encodeURIComponent(prefill) : null;
+  const fallbackRedirectUrl = encodedPrefill
+    ? `/app/onboarding?role=CREATOR&prefill=${encodedPrefill}`
+    : "/app/onboarding?role=CREATOR";
+  const signInUrl = encodedPrefill
+    ? `/creators/sign-in?prefill=${encodedPrefill}`
+    : "/creators/sign-in";
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10 md:px-8 md:py-14">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
@@ -181,12 +198,17 @@ export default function CreatorSignUpPage() {
             <p className="mt-2 text-sm text-zinc-600">
               Join in minutes. Set your creator profile and start receiving relevant campaign offers.
             </p>
+            {prefill ? (
+              <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+                Profile details detected. We will pre-fill your creator setup after signup.
+              </p>
+            ) : null}
             <div className="mt-5 flex justify-center">
               <SignUp
                 routing="path"
                 path="/creators/sign-up"
-                signInUrl="/creators/sign-in"
-                fallbackRedirectUrl="/app/onboarding?role=CREATOR"
+                signInUrl={signInUrl}
+                fallbackRedirectUrl={fallbackRedirectUrl}
               />
             </div>
           </div>

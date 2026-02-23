@@ -18,10 +18,10 @@ export default function CreatorsPage() {
       <section className="rounded-[2rem] bg-gradient-to-br from-rose-50 via-white to-orange-100 p-8 md:p-12">
         <Badge className="bg-zinc-900/90 text-white hover:bg-zinc-900">For creators</Badge>
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-          Monetize trusted recommendations with performance terms.
+          Make money by sharing the products you use and love.
         </h1>
         <p className="mt-5 max-w-3xl text-lg text-zinc-700">
-          Join campaigns where terms are clear up front. Get a dedicated ref link, track attributed outcomes, and get paid after approvals.
+          Partner with products you already trust, share them with your followers, and get paid for approved outcomes.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/creators/sign-up">

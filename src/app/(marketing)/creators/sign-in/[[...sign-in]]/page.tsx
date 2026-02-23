@@ -1,6 +1,23 @@
 import { SignIn } from "@clerk/nextjs";
 
-export default function CreatorSignInPage() {
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function CreatorSignInPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const prefill =
+    typeof params.prefill === "string" && params.prefill.length > 0
+      ? params.prefill
+      : null;
+  const encodedPrefill = prefill ? encodeURIComponent(prefill) : null;
+  const fallbackRedirectUrl = encodedPrefill
+    ? `/app/onboarding?role=CREATOR&prefill=${encodedPrefill}`
+    : "/app/onboarding?role=CREATOR";
+  const signUpUrl = encodedPrefill
+    ? `/creators/sign-up?prefill=${encodedPrefill}`
+    : "/creators/sign-up";
+
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-6xl items-center px-4 py-12 md:px-8">
       <div className="grid w-full gap-8 md:grid-cols-2 md:items-center">
@@ -19,8 +36,8 @@ export default function CreatorSignInPage() {
           <SignIn
             routing="path"
             path="/creators/sign-in"
-            signUpUrl="/creators/sign-up"
-            fallbackRedirectUrl="/app/onboarding?role=CREATOR"
+            signUpUrl={signUpUrl}
+            fallbackRedirectUrl={fallbackRedirectUrl}
           />
         </div>
       </div>

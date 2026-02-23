@@ -55,9 +55,11 @@ const roleMeta: Record<
 export function RoleForm({
   currentRole,
   preferredRole,
+  creatorPrefillToken,
 }: {
   currentRole?: string | null;
   preferredRole?: "CREATOR" | "BUILDER" | null;
+  creatorPrefillToken?: string | null;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -79,8 +81,13 @@ export function RoleForm({
         throw new Error(json.error || "Failed to save role");
       }
 
+      const destination =
+        role === "CREATOR" && creatorPrefillToken
+          ? `/app/creator/profile?prefill=${encodeURIComponent(creatorPrefillToken)}`
+          : roleMeta[role].destination;
+
       toast.success("Workspace configured");
-      router.push(roleMeta[role].destination);
+      router.push(destination);
       router.refresh();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to save role");
