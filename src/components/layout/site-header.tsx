@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const isCreatorFlow =
+    pathname.startsWith("/creators") || pathname.startsWith("/explore/campaigns");
   const onCreatorSignUp = pathname.startsWith("/creators/sign-up");
   const onCreatorSignIn = pathname.startsWith("/creators/sign-in");
-  const isCreatorAuthRoute = onCreatorSignUp || onCreatorSignIn;
 
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200/70 bg-white/85 backdrop-blur">
@@ -20,7 +21,7 @@ export function SiteHeader() {
             SignalMatch
           </Link>
           <nav className="hidden items-center gap-5 text-sm text-zinc-600 md:flex">
-            {isCreatorAuthRoute ? (
+            {isCreatorFlow ? (
               <>
                 <Link href="/creators/success-stories" className="hover:text-zinc-900">
                   Success Stories
@@ -46,16 +47,16 @@ export function SiteHeader() {
         </div>
         <div className="flex items-center gap-2.5">
           <SignedOut>
-            {isCreatorAuthRoute ? (
+            {isCreatorFlow ? (
               <>
-                {onCreatorSignUp ? (
+                {!onCreatorSignIn ? (
                   <Link href="/creators/sign-in">
                     <Button variant="outline" size="sm">
                       Creator sign in
                     </Button>
                   </Link>
                 ) : null}
-                {onCreatorSignIn ? (
+                {!onCreatorSignUp ? (
                   <Link href="/creators/sign-up">
                     <Button size="sm">Create creator account</Button>
                   </Link>
