@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CreatorPersonaDiscovery } from "@/components/marketing/creator-persona-discovery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -32,6 +33,10 @@ export default function CreatorsPage() {
             </Button>
           </Link>
         </div>
+      </section>
+
+      <section className="mt-10">
+        <CreatorPersonaDiscovery />
       </section>
 
       <section className="mt-10 grid gap-6 md:grid-cols-5">
