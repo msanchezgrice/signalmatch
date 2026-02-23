@@ -19,16 +19,30 @@ export function SiteHeader() {
           <Link href="/" className="text-lg font-semibold tracking-tight">
             SignalMatch
           </Link>
-          {!isCreatorAuthRoute ? (
-            <nav className="hidden items-center gap-5 text-sm text-zinc-600 md:flex">
+          <nav className="hidden items-center gap-5 text-sm text-zinc-600 md:flex">
+            {isCreatorAuthRoute ? (
+              <>
+                <Link href="/creators/success-stories" className="hover:text-zinc-900">
+                  Success Stories
+                </Link>
+                <Link href="/explore/campaigns" className="hover:text-zinc-900">
+                  Products Shared
+                </Link>
+                <Link href="/creators" className="hover:text-zinc-900">
+                  How It Works
+                </Link>
+              </>
+            ) : (
+              <>
               <Link href="/explore/creators" className="hover:text-zinc-900">
                 Creator Directory
               </Link>
               <Link href="/builders" className="hover:text-zinc-900">
                 How It Works
               </Link>
-            </nav>
-          ) : null}
+              </>
+            )}
+          </nav>
         </div>
         <div className="flex items-center gap-2.5">
           <SignedOut>
