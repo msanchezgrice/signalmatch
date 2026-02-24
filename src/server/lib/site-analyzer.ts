@@ -195,8 +195,6 @@ async function fetchWebsiteContent(inputUrl: string) {
     url.protocol === "https:" ? `http://${url.host}${url.pathname}${url.search}` : inputUrl;
   const jinaUrl = `https://r.jina.ai/http://${url.host}${url.pathname}${url.search}`;
   const preferFallbackHosts = new Set([
-    "linkedin.com",
-    "www.linkedin.com",
     "x.com",
     "www.x.com",
     "twitter.com",
@@ -262,7 +260,8 @@ function parsePlainTextFallback(body: string) {
         !/^Published Time:/i.test(line) &&
         !/^Skip to main content/i.test(line) &&
         !/^Sign in$/i.test(line) &&
-        !/^Join now$/i.test(line),
+        !/^Join now$/i.test(line) &&
+        !/^[=\-_*]{3,}$/.test(line),
     );
 
   const title =
@@ -285,7 +284,8 @@ function parsePlainTextFallback(body: string) {
         line.length > 12 &&
         !line.startsWith("Title:") &&
         !/^https?:/i.test(line) &&
-        !/^\[.*\]\(.*\)$/.test(line),
+        !/^\[.*\]\(.*\)$/.test(line) &&
+        !/^[=\-_*]{3,}$/.test(line),
     )
     .slice(0, 6);
 
@@ -300,25 +300,35 @@ function parsePlainTextFallback(body: string) {
 export async function analyzeSite(url: string): Promise<SiteAnalysis> {
   const { body, finalUrl, source } = await fetchWebsiteContent(url);
   const looksLikeHtml = /<html|<title|<h1|<meta/i.test(body);
+  const htmlWithoutScripts = looksLikeHtml
+    ? body
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    : body;
   const fallback = looksLikeHtml ? null : parsePlainTextFallback(body);
 
   const title = looksLikeHtml
-    ? extractFirstMatch(body, /<title[^>]*>([\s\S]*?)<\/title>/i)
+    ? extractFirstMatch(htmlWithoutScripts, /<title[^>]*>([\s\S]*?)<\/title>/i)
     : fallback?.title ?? null;
 
   const description = looksLikeHtml
     ? extractFirstMatch(
-        body,
+        htmlWithoutScripts,
         /<meta[^>]+name=["']description["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
       ) ??
       extractFirstMatch(
-        body,
+        htmlWithoutScripts,
         /<meta[^>]+property=["']og:description["'][^>]+content=["']([\s\S]*?)["'][^>]*>/i,
       )
     : fallback?.summary ?? null;
 
-  const headings = looksLikeHtml ? extractMany(body, /<h[12][^>]*>([\s\S]*?)<\/h[12]>/gi, 6) : [];
-  const listItems = looksLikeHtml ? extractMany(body, /<li[^>]*>([\s\S]*?)<\/li>/gi, 8) : [];
+  const headings = looksLikeHtml
+    ? extractMany(htmlWithoutScripts, /<h[12][^>]*>([\s\S]*?)<\/h[12]>/gi, 6)
+    : [];
+  const listItems = looksLikeHtml
+    ? extractMany(htmlWithoutScripts, /<li[^>]*>([\s\S]*?)<\/li>/gi, 8)
+    : [];
 
   const keyPoints = looksLikeHtml
     ? [...headings, ...listItems]
