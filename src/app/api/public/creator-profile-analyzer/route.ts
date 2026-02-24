@@ -138,7 +138,7 @@ function toSlug(value: string) {
 function splitTokens(value: string) {
   return value
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, " ")
+    .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .map((token) => token.trim())
     .filter((token) => token.length >= 2);
