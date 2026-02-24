@@ -21,6 +21,7 @@ const creatorProfilePrefillSchema = z.object({
   avatar_url: z.string().url().optional(),
   niches: z.array(z.string().min(1).max(50)).max(8).optional(),
   audience_tags: z.array(z.string().min(1).max(50)).max(8).optional(),
+  tool_stack: z.array(z.string().min(1).max(50)).max(12).optional(),
   channels: z.array(prefillChannelSchema).max(3).optional(),
 });
 
@@ -60,6 +61,7 @@ export function sanitizeCreatorPrefill(input: CreatorProfilePrefill) {
     ...value,
     niches: value.niches ? dedupe(value.niches).slice(0, 8) : undefined,
     audience_tags: value.audience_tags ? dedupe(value.audience_tags).slice(0, 8) : undefined,
+    tool_stack: value.tool_stack ? dedupe(value.tool_stack).slice(0, 12) : undefined,
   } satisfies CreatorProfilePrefill;
 }
 
@@ -94,6 +96,7 @@ export function mergeCreatorDefaults(
         avatar_url?: string | null;
         niches?: string[] | null;
         audience_tags?: string[] | null;
+        tool_stack?: string[] | null;
         channels?: unknown;
       }
     | null
@@ -106,6 +109,7 @@ export function mergeCreatorDefaults(
 
   const existingNiches = (existing?.niches ?? []).filter(Boolean);
   const existingAudience = (existing?.audience_tags ?? []).filter(Boolean);
+  const existingToolStack = (existing?.tool_stack ?? []).filter(Boolean);
   const existingChannels = Array.isArray(existing?.channels)
     ? (existing?.channels as unknown[])
     : [];
@@ -117,6 +121,8 @@ export function mergeCreatorDefaults(
     niches: existingNiches.length > 0 ? existingNiches : prefill.niches ?? [],
     audience_tags:
       existingAudience.length > 0 ? existingAudience : prefill.audience_tags ?? [],
+    tool_stack:
+      existingToolStack.length > 0 ? existingToolStack : prefill.tool_stack ?? [],
     channels:
       existingChannels.length > 0
         ? existingChannels

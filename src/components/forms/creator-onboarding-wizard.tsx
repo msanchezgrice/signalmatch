@@ -19,6 +19,7 @@ const schema = z.object({
   avatar_url: z.string().url("Avatar URL must be a valid URL.").optional().or(z.literal("")),
   niches_csv: z.string().optional(),
   audience_tags_csv: z.string().optional(),
+  tool_stack_csv: z.string().optional(),
   primary_platform: z.string().min(1),
   primary_handle: z.string().min(1, "Primary handle is required."),
   primary_url: z.string().url("Primary profile URL must be valid."),
@@ -68,6 +69,7 @@ export function CreatorOnboardingWizard({
     avatar_url?: string;
     niches?: string[];
     audience_tags?: string[];
+    tool_stack?: string[];
     channels?: unknown;
   } | null;
 }) {
@@ -86,6 +88,7 @@ export function CreatorOnboardingWizard({
       avatar_url: defaults?.avatar_url ?? "",
       niches_csv: defaults?.niches?.join(", ") ?? "",
       audience_tags_csv: defaults?.audience_tags?.join(", ") ?? "",
+      tool_stack_csv: defaults?.tool_stack?.join(", ") ?? "",
       primary_platform: primary?.platform ?? "x",
       primary_handle: primary?.handle ?? "",
       primary_url: primary?.url ?? "https://x.com/",
@@ -125,7 +128,9 @@ export function CreatorOnboardingWizard({
         display_name: values.display_name,
         bio: values.bio || undefined,
         avatar_url: values.avatar_url || undefined,
-        niches: parseCsv(values.niches_csv),
+        niches: Array.from(
+          new Set([...parseCsv(values.niches_csv), ...parseCsv(values.tool_stack_csv)]),
+        ).slice(0, 8),
         audience_tags: parseCsv(values.audience_tags_csv),
         channels: [
           {
@@ -235,6 +240,18 @@ export function CreatorOnboardingWizard({
               <label className="mb-1 block text-sm font-medium">Audience tags</label>
               <Input placeholder="founders, marketers, developers" {...form.register("audience_tags_csv")} />
             </div>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Products you use / AI tool stack
+            </label>
+            <Input
+              placeholder="chatgpt, claude, cursor, notion, canva"
+              {...form.register("tool_stack_csv")}
+            />
+            <p className="mt-1 text-xs text-zinc-500">
+              We use this to match you with products you already understand and trust.
+            </p>
           </div>
         </section>
       ) : null}

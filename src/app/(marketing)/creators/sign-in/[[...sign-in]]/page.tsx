@@ -12,8 +12,8 @@ export default async function CreatorSignInPage({ searchParams }: PageProps) {
       : null;
   const encodedQueryPrefill = prefillFromQuery ? encodeURIComponent(prefillFromQuery) : null;
   const redirectUrl = encodedQueryPrefill
-    ? `/app/creator/onboarding?prefill=${encodedQueryPrefill}`
-    : "/app/creator/onboarding";
+    ? `/app/creator/onboarding/complete?prefill=${encodedQueryPrefill}`
+    : "/app/creator/onboarding/complete";
   const signUpUrl = encodedQueryPrefill
     ? `/creators/sign-up?prefill=${encodedQueryPrefill}`
     : "/creators/sign-up";
