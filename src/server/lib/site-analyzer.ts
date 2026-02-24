@@ -25,6 +25,24 @@ const stopWords = new Set([
   "all",
   "more",
   "free",
+  "https",
+  "http",
+  "www",
+  "com",
+  "linkedin",
+  "twitter",
+  "javascript",
+  "available",
+  "content",
+  "main",
+  "skip",
+  "source",
+  "title",
+  "url",
+  "sign",
+  "join",
+  "login",
+  "posts",
 ]);
 
 type PersonaRule = {
@@ -176,13 +194,22 @@ async function fetchWebsiteContent(inputUrl: string) {
   const httpUrl =
     url.protocol === "https:" ? `http://${url.host}${url.pathname}${url.search}` : inputUrl;
   const jinaUrl = `https://r.jina.ai/http://${url.host}${url.pathname}${url.search}`;
+  const preferFallbackHosts = new Set([
+    "linkedin.com",
+    "www.linkedin.com",
+    "x.com",
+    "www.x.com",
+    "twitter.com",
+    "www.twitter.com",
+  ]);
+  const preferFallback = preferFallbackHosts.has(url.hostname.toLowerCase());
 
   const directHeaders = {
     "user-agent": "SignalMatchAnalyzer/1.0 (+https://www.signalmatch.me)",
     accept: "text/html,application/xhtml+xml",
   };
 
-  const attempts: Array<{
+  const directAttempts: Array<{
     url: string;
     source: "direct" | "fallback";
     headers?: Record<string, string>;
@@ -192,16 +219,25 @@ async function fetchWebsiteContent(inputUrl: string) {
   ];
 
   if (httpUrl !== inputUrl) {
-    attempts.push({ url: httpUrl, source: "direct", headers: directHeaders });
-    attempts.push({ url: httpUrl, source: "direct" });
+    directAttempts.push({ url: httpUrl, source: "direct", headers: directHeaders });
+    directAttempts.push({ url: httpUrl, source: "direct" });
   }
 
-  attempts.push({ url: jinaUrl, source: "fallback" });
+  const attempts = preferFallback
+    ? [{ url: jinaUrl, source: "fallback" as const }, ...directAttempts]
+    : [...directAttempts, { url: jinaUrl, source: "fallback" as const }];
 
   let lastError: Error | null = null;
   for (const attempt of attempts) {
     try {
       const result = await tryFetch(attempt.url, attempt.headers);
+      if (
+        attempt.source === "direct" &&
+        /JavaScript is not available|enable javascript|just a moment/i.test(result.body)
+      ) {
+        continue;
+      }
+
       return {
         ...result,
         source: attempt.source,
@@ -218,7 +254,16 @@ function parsePlainTextFallback(body: string) {
   const lines = body
     .split("\n")
     .map((line) => line.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter(
+      (line) =>
+        !/^Markdown Content:/i.test(line) &&
+        !/^URL Source:/i.test(line) &&
+        !/^Published Time:/i.test(line) &&
+        !/^Skip to main content/i.test(line) &&
+        !/^Sign in$/i.test(line) &&
+        !/^Join now$/i.test(line),
+    );
 
   const title =
     lines.find((line) => line.startsWith("Title:"))?.replace(/^Title:\s*/, "") ??
@@ -228,13 +273,20 @@ function parsePlainTextFallback(body: string) {
   const summaryCandidate = lines.find(
     (line) =>
       !line.startsWith("Title:") &&
-      !line.startsWith("URL Source:") &&
-      !line.startsWith("Markdown Content:") &&
+      !line.endsWith("===============") &&
+      !/^https?:/i.test(line) &&
+      !/^\[.*\]\(.*\)$/.test(line) &&
       line.length > 40,
   );
 
   const keyPoints = lines
-    .filter((line) => line.length > 20)
+    .filter(
+      (line) =>
+        line.length > 12 &&
+        !line.startsWith("Title:") &&
+        !/^https?:/i.test(line) &&
+        !/^\[.*\]\(.*\)$/.test(line),
+    )
     .slice(0, 6);
 
   return {

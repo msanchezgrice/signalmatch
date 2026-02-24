@@ -59,6 +59,9 @@ function cleanDisplayName(title: string | null, handle: string) {
   }
 
   const base = (title ?? handle)
+    .replace(/\s*\(@[^)]+\)\s*\/\s*X$/i, "")
+    .replace(/\s*\/\s*X$/i, "")
+    .replace(/\s*\|\s*LinkedIn$/i, "")
     .replace(/\s*\|.*$/, "")
     .replace(/\s*-.*$/, "")
     .replace(/^@/, "")
@@ -76,6 +79,46 @@ function inferAudienceTags(personas: Array<{ name: string; rationale: string }>)
     .map((persona) => toSlug(persona.name))
     .filter(Boolean)
     .slice(0, 5);
+}
+
+const bannedTags = new Set([
+  "https",
+  "http",
+  "www",
+  "com",
+  "linkedin",
+  "twitter",
+  "javascript",
+  "available",
+  "content",
+  "source",
+  "title",
+  "url",
+]);
+
+function cleanTags(tags: string[]) {
+  return tags
+    .map((tag) => tag.trim().toLowerCase())
+    .filter((tag) => tag.length >= 3 && !bannedTags.has(tag))
+    .slice(0, 5);
+}
+
+function selectBio(summary: string | null, keyPoints: string[]) {
+  const candidate =
+    summary ??
+    keyPoints.find(
+      (point) =>
+        point.length >= 24 &&
+        !/sign in|join now|skip to main/i.test(point) &&
+        !/^\[.*\]\(.*\)$/.test(point),
+    ) ??
+    null;
+
+  if (!candidate) {
+    return undefined;
+  }
+
+  return candidate.slice(0, 300);
 }
 
 async function extractAvatarUrl(url: string) {
@@ -159,12 +202,9 @@ export async function POST(req: NextRequest) {
       source_url: parsed.data.url,
       source_platform: platform,
       display_name: cleanDisplayName(analysis.title, handle),
-      bio:
-        analysis.summary ??
-        analysis.key_points.find((point) => point.length >= 32)?.slice(0, 300) ??
-        undefined,
+      bio: selectBio(analysis.summary, analysis.key_points),
       avatar_url: avatarUrl ?? undefined,
-      niches: analysis.category_tags.slice(0, 5),
+      niches: cleanTags(analysis.category_tags),
       audience_tags: inferAudienceTags(analysis.target_personas),
       channels: [
         {
