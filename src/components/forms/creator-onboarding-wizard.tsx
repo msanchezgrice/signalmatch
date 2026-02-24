@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { inferSocialProfileFromUrl } from "@/lib/social-profile-scrape";
 
 const schema = z.object({
   display_name: z.string().min(2, "Display name must be at least 2 characters."),
@@ -60,6 +61,10 @@ function parseCsv(value?: string) {
     .filter(Boolean);
 }
 
+function mergeCsvValues(current: string | undefined, incoming: string[], max = 8) {
+  return Array.from(new Set([...parseCsv(current), ...incoming])).slice(0, max).join(", ");
+}
+
 export function CreatorOnboardingWizard({
   defaults,
 }: {
@@ -76,6 +81,8 @@ export function CreatorOnboardingWizard({
   const router = useRouter();
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
+  const [scrapingPrimary, setScrapingPrimary] = useState(false);
+  const [scrapingSecondary, setScrapingSecondary] = useState(false);
   const channels = normalizeChannels(defaults?.channels);
   const primary = channels[0];
   const secondary = channels[1];
@@ -107,6 +114,92 @@ export function CreatorOnboardingWizard({
     if (step === 2) return "Social channels";
     return "Audience reach";
   }, [step]);
+
+  async function scrapeFromUrl(target: "primary" | "secondary") {
+    const isPrimary = target === "primary";
+    const urlField = isPrimary ? "primary_url" : "secondary_url";
+    const platformField = isPrimary ? "primary_platform" : "secondary_platform";
+    const handleField = isPrimary ? "primary_handle" : "secondary_handle";
+    const followersField = isPrimary ? "primary_followers" : "secondary_followers";
+    const impressionsField = isPrimary ? "primary_avg_impressions" : "secondary_avg_impressions";
+    const setLoading = isPrimary ? setScrapingPrimary : setScrapingSecondary;
+
+    const rawUrl = form.getValues(urlField) ?? "";
+    const inferred = inferSocialProfileFromUrl(rawUrl);
+    if (!inferred) {
+      toast.error("Enter a valid profile URL to scrape.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      form.setValue(urlField, inferred.normalizedUrl, { shouldDirty: true, shouldValidate: true });
+      form.setValue(platformField, inferred.platform, { shouldDirty: true, shouldValidate: true });
+      form.setValue(handleField, inferred.handle, { shouldDirty: true, shouldValidate: true });
+
+      if (!inferred.analysisPlatform) {
+        toast.success("Detected platform and handle from URL.");
+        return;
+      }
+
+      const res = await fetch("/api/public/creator-profile-analyzer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: inferred.normalizedUrl,
+          platform: inferred.analysisPlatform,
+        }),
+      });
+      const json = await res.json();
+
+      if (!res.ok || !json?.prefill) {
+        throw new Error(json?.error || "Could not scrape this profile.");
+      }
+
+      const prefill = json.prefill as {
+        display_name?: string;
+        bio?: string;
+        niches?: string[];
+        audience_tags?: string[];
+        channels?: Array<{ followers?: number; avg_impressions?: number }>;
+      };
+
+      if (isPrimary) {
+        if (!form.getValues("display_name") && prefill.display_name) {
+          form.setValue("display_name", prefill.display_name, { shouldDirty: true });
+        }
+        if (!form.getValues("bio") && prefill.bio) {
+          form.setValue("bio", prefill.bio, { shouldDirty: true });
+        }
+        if (prefill.niches?.length) {
+          form.setValue("niches_csv", mergeCsvValues(form.getValues("niches_csv"), prefill.niches, 8), {
+            shouldDirty: true,
+          });
+        }
+        if (prefill.audience_tags?.length) {
+          form.setValue(
+            "audience_tags_csv",
+            mergeCsvValues(form.getValues("audience_tags_csv"), prefill.audience_tags, 8),
+            { shouldDirty: true },
+          );
+        }
+      }
+
+      const firstChannel = Array.isArray(prefill.channels) ? prefill.channels[0] : null;
+      if (firstChannel) {
+        form.setValue(followersField, Number(firstChannel.followers ?? 0), { shouldDirty: true });
+        form.setValue(impressionsField, Number(firstChannel.avg_impressions ?? 0), {
+          shouldDirty: true,
+        });
+      }
+
+      toast.success("Profile scraped and fields prefilled.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not scrape profile.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function onSubmit(values: FormData) {
     setSubmitting(true);
@@ -283,6 +376,17 @@ export function CreatorOnboardingWizard({
             <div className="mt-4">
               <label className="mb-1 block text-sm font-medium">Profile URL</label>
               <Input placeholder="https://x.com/yourhandle" {...form.register("primary_url")} />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2"
+                onClick={() => scrapeFromUrl("primary")}
+                disabled={submitting || scrapingPrimary}
+              >
+                {scrapingPrimary ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Scrape from URL
+              </Button>
             </div>
           </div>
 
@@ -314,6 +418,17 @@ export function CreatorOnboardingWizard({
                 placeholder="https://www.linkedin.com/in/your-profile"
                 {...form.register("secondary_url")}
               />
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="mt-2"
+                onClick={() => scrapeFromUrl("secondary")}
+                disabled={submitting || scrapingSecondary}
+              >
+                {scrapingSecondary ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Scrape from URL
+              </Button>
             </div>
           </div>
         </section>

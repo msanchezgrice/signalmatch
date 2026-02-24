@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { inferSocialProfileFromUrl } from "@/lib/social-profile-scrape";
 
 type PrefillChannel = {
   platform: string;
@@ -87,6 +88,11 @@ function normalizeChannels(channels: CreatorSignupPrefill["channels"]) {
   return channels.slice(0, 2);
 }
 
+function mergeCsvValues(current: string | undefined, incoming: string[], max = 8) {
+  const merged = parseCsv(current, max).concat(incoming);
+  return parseCsv(merged.join(", "), max).join(", ");
+}
+
 export function CreatorSignupHappyPath({
   initialPrefill,
   redirectUrl,
@@ -98,6 +104,8 @@ export function CreatorSignupHappyPath({
 }) {
   const [step, setStep] = useState<Step>(1);
   const [savingDraft, setSavingDraft] = useState(false);
+  const [scrapingPrimary, setScrapingPrimary] = useState(false);
+  const [scrapingSecondary, setScrapingSecondary] = useState(false);
   const channels = normalizeChannels(initialPrefill?.channels);
   const primary = channels[0];
   const secondary = channels[1];
@@ -142,6 +150,85 @@ export function CreatorSignupHappyPath({
     }
 
     setStep(2);
+  }
+
+  async function scrapeFromUrl(target: "primary" | "secondary") {
+    const isPrimary = target === "primary";
+    const urlField = isPrimary ? "primary_url" : "secondary_url";
+    const platformField = isPrimary ? "primary_platform" : "secondary_platform";
+    const handleField = isPrimary ? "primary_handle" : "secondary_handle";
+    const followersField = isPrimary ? "primary_followers" : "secondary_followers";
+    const impressionsField = isPrimary ? "primary_avg_impressions" : "secondary_avg_impressions";
+    const setLoading = isPrimary ? setScrapingPrimary : setScrapingSecondary;
+
+    const rawUrl = form.getValues(urlField) ?? "";
+    const inferred = inferSocialProfileFromUrl(rawUrl);
+    if (!inferred) {
+      toast.error("Enter a valid profile URL to scrape.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      form.setValue(urlField, inferred.normalizedUrl, { shouldDirty: true, shouldValidate: true });
+      form.setValue(platformField, inferred.platform, { shouldDirty: true, shouldValidate: true });
+      form.setValue(handleField, inferred.handle, { shouldDirty: true, shouldValidate: true });
+
+      if (!inferred.analysisPlatform) {
+        toast.success("Detected platform and handle from URL.");
+        return;
+      }
+
+      const res = await fetch("/api/public/creator-profile-analyzer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: inferred.normalizedUrl,
+          platform: inferred.analysisPlatform,
+        }),
+      });
+      const json = await res.json();
+
+      if (!res.ok || !json?.prefill) {
+        throw new Error(json?.error || "Could not scrape this profile.");
+      }
+
+      const prefill = json.prefill as CreatorSignupPrefill;
+      const firstChannel = Array.isArray(prefill.channels) ? prefill.channels[0] : null;
+
+      if (isPrimary) {
+        if (!form.getValues("display_name") && prefill.display_name) {
+          form.setValue("display_name", prefill.display_name, { shouldDirty: true });
+        }
+        if (!form.getValues("bio") && prefill.bio) {
+          form.setValue("bio", prefill.bio, { shouldDirty: true });
+        }
+
+        if (prefill.niches?.length) {
+          form.setValue("niches_csv", mergeCsvValues(form.getValues("niches_csv"), prefill.niches, 8), {
+            shouldDirty: true,
+          });
+        }
+        if (prefill.audience_tags?.length) {
+          form.setValue(
+            "audience_tags_csv",
+            mergeCsvValues(form.getValues("audience_tags_csv"), prefill.audience_tags, 8),
+            { shouldDirty: true },
+          );
+        }
+      }
+
+      if (firstChannel) {
+        form.setValue(followersField, Number(firstChannel.followers ?? 0), { shouldDirty: true });
+        form.setValue(impressionsField, Number(firstChannel.avg_impressions ?? 0), { shouldDirty: true });
+      }
+
+      toast.success("Profile scraped and fields prefilled.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not scrape profile.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function continueToAccountStep() {
@@ -295,6 +382,17 @@ export function CreatorSignupHappyPath({
               <div>
                 <label className="mb-1 block text-sm font-medium">Primary profile URL</label>
                 <Input placeholder="https://x.com/yourhandle" {...form.register("primary_url")} />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => scrapeFromUrl("primary")}
+                  disabled={savingDraft || scrapingPrimary}
+                >
+                  {scrapingPrimary ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Scrape from URL
+                </Button>
               </div>
             </div>
 
@@ -346,6 +444,17 @@ export function CreatorSignupHappyPath({
               <div className="mt-4">
                 <label className="mb-1 block text-sm font-medium">Secondary profile URL</label>
                 <Input placeholder="https://www.linkedin.com/in/your-profile" {...form.register("secondary_url")} />
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="mt-2"
+                  onClick={() => scrapeFromUrl("secondary")}
+                  disabled={savingDraft || scrapingSecondary}
+                >
+                  {scrapingSecondary ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  Scrape from URL
+                </Button>
               </div>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
                 <div>
