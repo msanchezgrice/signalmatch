@@ -7,6 +7,8 @@ export function SiteFooter() {
   const pathname = usePathname();
   const isCreatorFlow =
     pathname.startsWith("/creators") || pathname.startsWith("/explore/campaigns");
+  const onCreatorAuthFlow =
+    pathname.startsWith("/creators/sign-up") || pathname.startsWith("/creators/sign-in");
 
   return (
     <footer className="border-t border-zinc-200 bg-white">
@@ -19,39 +21,41 @@ export function SiteFooter() {
               : "Performance partnerships for product growth teams."}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-4 text-zinc-600">
-          {isCreatorFlow ? (
-            <>
-              <Link href="/creators" className="hover:text-zinc-900">
-                Creator Guide
-              </Link>
-              <Link href="/creators/success-stories" className="hover:text-zinc-900">
-                Success Stories
-              </Link>
-              <Link href="/explore/campaigns" className="hover:text-zinc-900">
-                Products Shared
-              </Link>
-              <Link href="/creators/sign-up" className="hover:text-zinc-900">
-                Create creator account
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/" className="hover:text-zinc-900">
-                Home
-              </Link>
-              <Link href="/builders" className="hover:text-zinc-900">
-                Builder Guide
-              </Link>
-              <Link href="/explore/creators" className="hover:text-zinc-900">
-                Creator Directory
-              </Link>
-              <Link href="/builders/sign-up" className="hover:text-zinc-900">
-                Builder signup
-              </Link>
-            </>
-          )}
-        </div>
+        {!onCreatorAuthFlow ? (
+          <div className="flex flex-wrap items-center gap-4 text-zinc-600">
+            {isCreatorFlow ? (
+              <>
+                <Link href="/creators" className="hover:text-zinc-900">
+                  Creator Guide
+                </Link>
+                <Link href="/creators/success-stories" className="hover:text-zinc-900">
+                  Success Stories
+                </Link>
+                <Link href="/explore/campaigns" className="hover:text-zinc-900">
+                  Products Shared
+                </Link>
+                <Link href="/creators/sign-up" className="hover:text-zinc-900">
+                  Create creator account
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/" className="hover:text-zinc-900">
+                  Home
+                </Link>
+                <Link href="/builders" className="hover:text-zinc-900">
+                  Builder Guide
+                </Link>
+                <Link href="/explore/creators" className="hover:text-zinc-900">
+                  Creator Directory
+                </Link>
+                <Link href="/builders/sign-up" className="hover:text-zinc-900">
+                  Builder signup
+                </Link>
+              </>
+            )}
+          </div>
+        ) : null}
       </div>
     </footer>
   );

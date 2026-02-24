@@ -3,84 +3,6 @@ import { cookies } from "next/headers";
 import { SignUp } from "@clerk/nextjs";
 import { CREATOR_PREFILL_COOKIE_NAME } from "@/server/lib/creator-profile-prefill";
 
-const whyPeopleJoin = [
-  "Make money from products you already use and trust.",
-  "Only promote offers that match your audience.",
-  "Get paid for real outcomes, not vanity metrics.",
-];
-
-const creatorFlow = [
-  {
-    step: "1",
-    title: "Create your creator profile",
-    body: "Add your channels, audience, and topics so builders can send relevant offers.",
-  },
-  {
-    step: "2",
-    title: "Pick products you actually use",
-    body: "Accept only the partnerships you believe in and would already recommend.",
-  },
-  {
-    step: "3",
-    title: "Share and earn",
-    body: "Post your unique link on TikTok, X, and LinkedIn. Earn when your followers convert.",
-  },
-];
-
-const earningsExamples = [
-  {
-    title: "Starter",
-    detail: "15 approved signups",
-    payout: "$120 at $8 CPA",
-  },
-  {
-    title: "Consistent",
-    detail: "40 approved signups",
-    payout: "$320 at $8 CPA",
-  },
-  {
-    title: "High-performing",
-    detail: "80 approved activations",
-    payout: "$960 at $12 CPA",
-  },
-];
-
-const faqs = [
-  {
-    q: "Do I need a huge following?",
-    a: "No. Fit and trust matter more than follower count. Builders care about conversion quality.",
-  },
-  {
-    q: "Can I choose what I promote?",
-    a: "Yes. You only accept deals you want. You stay in control of every partnership.",
-  },
-  {
-    q: "When do I get paid?",
-    a: "Payouts are released after conversions are approved based on each campaign's terms.",
-  },
-];
-
-const proofLinks = [
-  {
-    title: "Success stories",
-    body: "See real creator examples and what campaigns paid them.",
-    href: "/creators/success-stories",
-    cta: "See creator wins",
-  },
-  {
-    title: "How it works",
-    body: "Understand exactly how offers, links, approvals, and payouts work.",
-    href: "/creators",
-    cta: "Read the creator guide",
-  },
-  {
-    title: "Products creators are sharing",
-    body: "Preview active campaigns and choose products you genuinely trust.",
-    href: "/explore/campaigns",
-    cta: "Browse shared products",
-  },
-];
-
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -98,128 +20,51 @@ export default async function CreatorSignUpPage({ searchParams }: PageProps) {
   const redirectUrl = encodedQueryPrefill
     ? `/app/creator/onboarding?prefill=${encodedQueryPrefill}`
     : "/app/creator/onboarding";
-  const signInUrl = encodedQueryPrefill
+  const creatorSignInUrl = encodedQueryPrefill
     ? `/creators/sign-in?prefill=${encodedQueryPrefill}`
     : "/creators/sign-in";
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10 md:px-8 md:py-14">
-      <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
-        <section className="space-y-8">
-          <div className="rounded-[2rem] bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100 p-7 md:p-10">
-            <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-600">
-              For TikTok, X, and LinkedIn creators
-            </p>
-            <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight text-zinc-900 md:text-6xl">
-              Make money from sharing products you use every day.
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg text-zinc-700">
-              SignalMatch helps you monetize trusted recommendations. Promote products you already use,
-              love, and trust, and earn when your followers take real action.
-            </p>
-            <div className="mt-6 grid gap-3 text-sm text-zinc-700 md:grid-cols-3">
-              {whyPeopleJoin.map((item) => (
-                <p key={item} className="rounded-2xl bg-white/85 px-4 py-3">
-                  {item}
-                </p>
-              ))}
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
-              <Link href="/creators/success-stories" className="rounded-full bg-zinc-900 px-4 py-2 font-medium text-white transition hover:bg-zinc-700">
-                Success stories
-              </Link>
-              <Link href="/explore/campaigns" className="rounded-full border border-zinc-300 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:bg-zinc-50">
-                Products shared
-              </Link>
-              <Link href="/creators" className="rounded-full border border-zinc-300 bg-white px-4 py-2 font-medium text-zinc-800 transition hover:bg-zinc-50">
-                How it works
-              </Link>
-            </div>
-          </div>
+    <main className="mx-auto w-full max-w-3xl px-4 py-12 md:px-8 md:py-16">
+      <section className="rounded-3xl border border-zinc-200 bg-white p-6 md:p-10">
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-zinc-500">
+          Creator onboarding
+        </p>
+        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-zinc-900 md:text-5xl">
+          Create your account and start earning from products you already use.
+        </h1>
+        <p className="mt-4 text-zinc-600">
+          One flow only: create your account, complete onboarding, and start receiving relevant partnership offers.
+        </p>
+        <ul className="mt-5 space-y-2 text-sm text-zinc-700">
+          <li>1. Add your social URLs and handles (LinkedIn, X, TikTok, YouTube, etc.)</li>
+          <li>2. Add follower counts and average impressions</li>
+          <li>3. Add interests and audience profile for better campaign matching</li>
+        </ul>
+        {prefill ? (
+          <p className="mt-5 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+            Profile details detected. We will pre-fill your onboarding details after signup.
+          </p>
+        ) : null}
+      </section>
 
-          <section className="rounded-3xl border border-zinc-200 bg-white p-6 md:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">How it works</h2>
-            <div className="mt-5 grid gap-5 md:grid-cols-3">
-              {creatorFlow.map((item) => (
-                <div key={item.step} className="border-l-2 border-rose-300 pl-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">Step {item.step}</p>
-                  <p className="mt-2 text-base font-semibold text-zinc-900">{item.title}</p>
-                  <p className="mt-2 text-sm text-zinc-600">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-3xl border border-zinc-200 bg-white p-6 md:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">Before you sign up, check this</h2>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              {proofLinks.map((item) => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 transition hover:border-zinc-300 hover:bg-white"
-                >
-                  <p className="text-base font-semibold text-zinc-900">{item.title}</p>
-                  <p className="mt-2 text-sm text-zinc-600">{item.body}</p>
-                  <p className="mt-3 text-sm font-medium text-zinc-900">{item.cta} →</p>
-                </Link>
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-3xl border border-zinc-200 bg-white p-6 md:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">Example earnings</h2>
-            <p className="mt-2 text-sm text-zinc-600">
-              These are sample scenarios. Your results depend on your audience fit and campaign performance.
-            </p>
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
-              {earningsExamples.map((item) => (
-                <div key={item.title} className="rounded-2xl bg-zinc-50 p-4">
-                  <p className="text-xs font-medium uppercase tracking-[0.14em] text-zinc-500">{item.title}</p>
-                  <p className="mt-2 text-sm text-zinc-700">{item.detail}</p>
-                  <p className="mt-1 text-lg font-semibold text-zinc-900">{item.payout}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="rounded-3xl bg-zinc-900 p-6 text-zinc-100 md:p-8">
-            <h2 className="text-2xl font-semibold tracking-tight">Frequently asked questions</h2>
-            <div className="mt-5 space-y-4">
-              {faqs.map((item) => (
-                <div key={item.q}>
-                  <p className="font-medium">{item.q}</p>
-                  <p className="mt-1 text-sm text-zinc-300">{item.a}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        </section>
-
-        <aside className="lg:sticky lg:top-24">
-          <div className="rounded-3xl border border-zinc-200 bg-white p-4 shadow-sm md:p-6">
-            <p className="text-sm font-medium uppercase tracking-[0.16em] text-zinc-500">Create your account</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Start earning from your audience</h2>
-            <p className="mt-2 text-sm text-zinc-600">
-              Join in minutes. Set your creator profile and start receiving relevant campaign offers.
-            </p>
-            {prefill ? (
-              <p className="mt-3 rounded-xl bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
-                Profile details detected. We will pre-fill your creator setup after signup.
-              </p>
-            ) : null}
-            <div className="mt-5 flex justify-center">
-              <SignUp
-                routing="path"
-                path="/creators/sign-up"
-                signInUrl={signInUrl}
-                fallbackRedirectUrl={redirectUrl}
-                forceRedirectUrl={redirectUrl}
-              />
-            </div>
-          </div>
-        </aside>
-      </div>
+      <section className="mt-6 rounded-3xl border border-zinc-200 bg-white p-4 md:p-6">
+        <div className="flex justify-center">
+          <SignUp
+            routing="path"
+            path="/creators/sign-up"
+            signInUrl={creatorSignInUrl}
+            fallbackRedirectUrl={redirectUrl}
+            forceRedirectUrl={redirectUrl}
+          />
+        </div>
+        <p className="mt-4 text-center text-xs text-zinc-500">
+          Already have an account?{" "}
+          <Link href={creatorSignInUrl} className="font-medium text-zinc-800 underline underline-offset-4">
+            Sign in
+          </Link>
+        </p>
+      </section>
     </main>
   );
 }

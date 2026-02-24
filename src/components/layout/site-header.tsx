@@ -12,6 +12,7 @@ export function SiteHeader() {
     pathname.startsWith("/creators") || pathname.startsWith("/explore/campaigns");
   const onCreatorSignUp = pathname.startsWith("/creators/sign-up");
   const onCreatorSignIn = pathname.startsWith("/creators/sign-in");
+  const onCreatorAuthFlow = onCreatorSignUp || onCreatorSignIn;
 
   return (
     <header className="sticky top-0 z-50 border-b border-zinc-200/70 bg-white/85 backdrop-blur">
@@ -20,34 +21,51 @@ export function SiteHeader() {
           <Link href="/" className="text-lg font-semibold tracking-tight">
             SignalMatch
           </Link>
-          <nav className="hidden items-center gap-5 text-sm text-zinc-600 md:flex">
-            {isCreatorFlow ? (
-              <>
-                <Link href="/creators/success-stories" className="hover:text-zinc-900">
-                  Success Stories
+          {!onCreatorAuthFlow ? (
+            <nav className="hidden items-center gap-5 text-sm text-zinc-600 md:flex">
+              {isCreatorFlow ? (
+                <>
+                  <Link href="/creators/success-stories" className="hover:text-zinc-900">
+                    Success Stories
+                  </Link>
+                  <Link href="/explore/campaigns" className="hover:text-zinc-900">
+                    Products Shared
+                  </Link>
+                  <Link href="/creators" className="hover:text-zinc-900">
+                    How It Works
+                  </Link>
+                </>
+              ) : (
+                <>
+                <Link href="/explore/creators" className="hover:text-zinc-900">
+                  Creator Directory
                 </Link>
-                <Link href="/explore/campaigns" className="hover:text-zinc-900">
-                  Products Shared
-                </Link>
-                <Link href="/creators" className="hover:text-zinc-900">
+                <Link href="/builders" className="hover:text-zinc-900">
                   How It Works
                 </Link>
-              </>
-            ) : (
-              <>
-              <Link href="/explore/creators" className="hover:text-zinc-900">
-                Creator Directory
-              </Link>
-              <Link href="/builders" className="hover:text-zinc-900">
-                How It Works
-              </Link>
-              </>
-            )}
-          </nav>
+                </>
+              )}
+            </nav>
+          ) : null}
         </div>
         <div className="flex items-center gap-2.5">
           <SignedOut>
-            {isCreatorFlow ? (
+            {onCreatorAuthFlow ? (
+              <>
+                {onCreatorSignUp ? (
+                  <Link href="/creators/sign-in">
+                    <Button variant="outline" size="sm">
+                      Already have an account? Sign in
+                    </Button>
+                  </Link>
+                ) : null}
+                {onCreatorSignIn ? (
+                  <Link href="/creators/sign-up">
+                    <Button size="sm">Create creator account</Button>
+                  </Link>
+                ) : null}
+              </>
+            ) : isCreatorFlow ? (
               <>
                 {!onCreatorSignIn ? (
                   <Link href="/creators/sign-in">
