@@ -135,6 +135,15 @@ function toSlug(value: string) {
     .slice(0, 40);
 }
 
+function splitTokens(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length >= 2);
+}
+
 function cleanDisplayName(title: string | null, handle: string) {
   if (!title && !handle) {
     return "";
@@ -176,12 +185,35 @@ const bannedTags = new Set([
   "source",
   "title",
   "url",
+  "profile",
+  "activity",
+  "member",
+  "members",
+  "connections",
+  "followers",
+  "view",
 ]);
 
-function cleanTags(tags: string[]) {
+function cleanTags(tags: string[], blockedTokens: Set<string>) {
   return tags
     .map((tag) => tag.trim().toLowerCase())
-    .filter((tag) => tag.length >= 3 && !bannedTags.has(tag))
+    .filter((tag) => {
+      if (tag.length < 3 || bannedTags.has(tag)) {
+        return false;
+      }
+
+      const tokenParts = tag.split("-").filter(Boolean);
+      if (!tokenParts.length) {
+        return false;
+      }
+
+      // Remove obvious self-referential tags like name/handle fragments.
+      if (tokenParts.every((part) => blockedTokens.has(part))) {
+        return false;
+      }
+
+      return true;
+    })
     .slice(0, 5);
 }
 
@@ -201,6 +233,119 @@ function selectBio(summary: string | null, keyPoints: string[]) {
   }
 
   return candidate.slice(0, 300);
+}
+
+function parseHumanCount(rawValue: string, suffix?: string) {
+  const numeric = Number(rawValue.replace(/,/g, ""));
+  if (!Number.isFinite(numeric)) {
+    return 0;
+  }
+
+  if (!suffix) {
+    return Math.round(numeric);
+  }
+
+  const normalized = suffix.toLowerCase();
+  if (normalized === "k") {
+    return Math.round(numeric * 1_000);
+  }
+
+  if (normalized === "m") {
+    return Math.round(numeric * 1_000_000);
+  }
+
+  return Math.round(numeric);
+}
+
+function extractFollowers(platform: Platform, textCandidates: string[]) {
+  const corpus = textCandidates.join(" ");
+  const pattern =
+    /([0-9][0-9,]*(?:\.[0-9]+)?)\s*([kKmM])?\s*\+?\s*(followers?|connections?)/gi;
+  let best = 0;
+
+  for (const match of corpus.matchAll(pattern)) {
+    const value = parseHumanCount(match[1] ?? "", match[2]);
+    const metric = (match[3] ?? "").toLowerCase();
+
+    if (platform === "x" && metric.startsWith("connection")) {
+      continue;
+    }
+
+    if (value > best) {
+      best = value;
+    }
+  }
+
+  return best;
+}
+
+const toolSignals: Array<{ label: string; patterns: RegExp[] }> = [
+  { label: "ChatGPT", patterns: [/\bchatgpt\b/i] },
+  { label: "Claude", patterns: [/\bclaude\b/i] },
+  { label: "Cursor", patterns: [/\bcursor\b/i] },
+  { label: "Perplexity", patterns: [/\bperplexity\b/i] },
+  { label: "Notion", patterns: [/\bnotion\b/i] },
+  { label: "Canva", patterns: [/\bcanva\b/i] },
+  { label: "Figma", patterns: [/\bfigma\b/i] },
+  { label: "GitHub", patterns: [/\bgithub\b/i] },
+  { label: "Vercel", patterns: [/\bvercel\b/i] },
+  { label: "Supabase", patterns: [/\bsupabase\b/i] },
+  { label: "Zapier", patterns: [/\bzapier\b/i] },
+  { label: "Airtable", patterns: [/\bairtable\b/i] },
+  { label: "HubSpot", patterns: [/\bhubspot\b/i] },
+  { label: "Salesforce", patterns: [/\bsalesforce\b/i] },
+  { label: "Stripe", patterns: [/\bstripe\b/i] },
+  { label: "Google Analytics", patterns: [/\bgoogle analytics\b/i, /\bga4\b/i] },
+  { label: "Meta Ads", patterns: [/\bmeta ads\b/i, /\bfacebook ads\b/i] },
+  { label: "Shopify", patterns: [/\bshopify\b/i] },
+  { label: "Webflow", patterns: [/\bwebflow\b/i] },
+  { label: "Framer", patterns: [/\bframer\b/i] },
+  { label: "CapCut", patterns: [/\bcapcut\b/i] },
+  { label: "Substack", patterns: [/\bsubstack\b/i] },
+  { label: "Beehiiv", patterns: [/\bbeehiiv\b/i] },
+  { label: "Mailchimp", patterns: [/\bmailchimp\b/i] },
+];
+
+const personaToolDefaults: Record<string, string[]> = {
+  "Startup founders": ["Notion", "Slack", "Stripe"],
+  "Developers and engineers": ["GitHub", "Cursor", "Vercel"],
+  "Marketers and growth teams": ["Google Analytics", "HubSpot", "Meta Ads"],
+  "Sales and RevOps teams": ["HubSpot", "Salesforce", "Airtable"],
+  "Creators and educators": ["Canva", "CapCut", "Substack"],
+};
+
+function inferToolStack(corpus: string, personas: Array<{ name: string }>) {
+  const found: string[] = [];
+  const seen = new Set<string>();
+
+  for (const signal of toolSignals) {
+    if (signal.patterns.some((pattern) => pattern.test(corpus))) {
+      const key = signal.label.toLowerCase();
+      if (!seen.has(key)) {
+        seen.add(key);
+        found.push(signal.label);
+      }
+    }
+  }
+
+  if (found.length < 3) {
+    for (const persona of personas) {
+      const defaults = personaToolDefaults[persona.name] ?? [];
+      for (const tool of defaults) {
+        const key = tool.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          found.push(tool);
+        }
+      }
+
+      if (found.length >= 6) {
+        break;
+      }
+    }
+  }
+
+  return found.slice(0, 8);
 }
 
 async function extractAvatarUrl(url: string) {
@@ -280,23 +425,36 @@ export async function POST(req: NextRequest) {
     const normalizedUrl = normalized.url.toString();
     const platform = normalized.platform;
     const handle = normalized.handle;
-    const analysis = await analyzeSite(normalizedUrl);
-    const avatarUrl = await extractAvatarUrl(normalizedUrl);
+    const [analysis, avatarUrl] = await Promise.all([
+      analyzeSite(normalizedUrl),
+      extractAvatarUrl(normalizedUrl),
+    ]);
+    const displayName = cleanDisplayName(analysis.title, handle);
+    const blockedTokens = new Set<string>([
+      ...splitTokens(handle.replace(/[._-]/g, " ")),
+      ...splitTokens(displayName),
+    ]);
+    const analysisText = [analysis.title, analysis.summary, ...analysis.key_points]
+      .filter(Boolean)
+      .join(" ");
+    const followers = extractFollowers(platform, [analysis.summary ?? "", ...analysis.key_points]);
+    const toolStack = inferToolStack(analysisText, analysis.target_personas);
 
     const prefill: CreatorProfilePrefill = {
       source_url: normalizedUrl,
       source_platform: platform,
-      display_name: cleanDisplayName(analysis.title, handle),
+      display_name: displayName,
       bio: selectBio(analysis.summary, analysis.key_points),
       avatar_url: avatarUrl ?? undefined,
-      niches: cleanTags(analysis.category_tags),
+      niches: cleanTags(analysis.category_tags, blockedTokens),
       audience_tags: inferAudienceTags(analysis.target_personas),
+      tool_stack: toolStack,
       channels: [
         {
           platform,
           handle,
           url: normalizedUrl,
-          followers: 0,
+          followers,
           avg_impressions: 0,
         },
       ],

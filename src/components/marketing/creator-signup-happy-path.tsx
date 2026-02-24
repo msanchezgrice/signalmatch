@@ -216,6 +216,13 @@ export function CreatorSignupHappyPath({
             { shouldDirty: true },
           );
         }
+        if (prefill.tool_stack?.length) {
+          form.setValue(
+            "tool_stack_csv",
+            mergeCsvValues(form.getValues("tool_stack_csv"), prefill.tool_stack, 12),
+            { shouldDirty: true },
+          );
+        }
       }
 
       if (firstChannel) {

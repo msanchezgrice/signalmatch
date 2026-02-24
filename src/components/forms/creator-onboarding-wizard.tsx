@@ -161,6 +161,7 @@ export function CreatorOnboardingWizard({
         bio?: string;
         niches?: string[];
         audience_tags?: string[];
+        tool_stack?: string[];
         channels?: Array<{ followers?: number; avg_impressions?: number }>;
       };
 
@@ -181,6 +182,15 @@ export function CreatorOnboardingWizard({
             "audience_tags_csv",
             mergeCsvValues(form.getValues("audience_tags_csv"), prefill.audience_tags, 8),
             { shouldDirty: true },
+          );
+        }
+        if (prefill.tool_stack?.length) {
+          form.setValue(
+            "tool_stack_csv",
+            mergeCsvValues(form.getValues("tool_stack_csv"), prefill.tool_stack, 12),
+            {
+              shouldDirty: true,
+            },
           );
         }
       }
