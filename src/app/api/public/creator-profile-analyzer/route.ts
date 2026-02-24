@@ -8,26 +8,120 @@ import {
 import { analyzeSite } from "@/server/lib/site-analyzer";
 import { enforceRateLimit } from "@/server/rate-limit";
 
+type Platform = "linkedin" | "x";
+
 const schema = z.object({
-  url: z.string().url(),
+  url: z.string().trim().min(1),
   platform: z.enum(["linkedin", "x"]).optional(),
 });
 
-const allowedHosts = new Set([
-  "linkedin.com",
-  "www.linkedin.com",
-  "x.com",
-  "www.x.com",
-  "twitter.com",
-  "www.twitter.com",
+const blockedXPaths = new Set([
+  "home",
+  "explore",
+  "notifications",
+  "messages",
+  "settings",
+  "search",
+  "i",
+  "share",
+  "intent",
+  "tos",
+  "privacy",
 ]);
 
-function inferPlatformFromUrl(url: URL): "linkedin" | "x" {
-  if (url.hostname.includes("linkedin")) {
+function normalizeHost(hostname: string) {
+  return hostname.toLowerCase().replace(/^(www|m|mobile)\./, "");
+}
+
+function inferPlatformFromHost(hostname: string): Platform | null {
+  const normalized = normalizeHost(hostname);
+
+  if (normalized === "linkedin.com") {
     return "linkedin";
   }
 
-  return "x";
+  if (normalized === "x.com" || normalized === "twitter.com") {
+    return "x";
+  }
+
+  return null;
+}
+
+function sanitizeHandle(value: string) {
+  return decodeURIComponent(value).replace(/^@+/, "").trim();
+}
+
+function extractHandle(pathname: string, platform: Platform) {
+  const segments = pathname.split("/").filter(Boolean);
+
+  if (platform === "linkedin") {
+    if (segments[0]?.toLowerCase() === "in" && segments[1]) {
+      return sanitizeHandle(segments[1]);
+    }
+
+    return sanitizeHandle(segments[0] ?? "");
+  }
+
+  const first = sanitizeHandle(segments[0] ?? "");
+  if (!first || blockedXPaths.has(first.toLowerCase())) {
+    return "";
+  }
+
+  return first;
+}
+
+function isValidHandle(handle: string) {
+  return /^[A-Za-z0-9._-]{2,100}$/.test(handle);
+}
+
+function normalizeProfileInput(rawInput: string, platformHint?: Platform) {
+  const input = rawInput.trim();
+  const directHandle = input.match(/^@?([A-Za-z0-9._-]{2,100})$/);
+
+  if (directHandle && !input.includes(".") && !input.includes("/")) {
+    const platform = platformHint ?? "x";
+    const handle = sanitizeHandle(directHandle[1]);
+
+    if (!isValidHandle(handle)) {
+      return { error: "That handle format is not supported yet." as const };
+    }
+
+    const url =
+      platform === "linkedin"
+        ? new URL(`https://www.linkedin.com/in/${handle}`)
+        : new URL(`https://x.com/${handle}`);
+
+    return { url, platform, handle };
+  }
+
+  let candidate = input;
+  if (!/^https?:\/\//i.test(candidate)) {
+    candidate = `https://${candidate}`;
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    return { error: "Enter a valid LinkedIn or X profile URL or handle." as const };
+  }
+
+  const platform = inferPlatformFromHost(parsed.hostname);
+  if (!platform) {
+    return { error: "Only LinkedIn and X profile URLs are supported right now." as const };
+  }
+
+  const handle = extractHandle(parsed.pathname, platform);
+  if (!handle || !isValidHandle(handle)) {
+    return { error: "Enter a profile URL that points to an actual person handle." as const };
+  }
+
+  const url =
+    platform === "linkedin"
+      ? new URL(`https://www.linkedin.com/in/${handle}`)
+      : new URL(`https://x.com/${handle}`);
+
+  return { url, platform, handle };
 }
 
 function toSlug(value: string) {
@@ -37,20 +131,6 @@ function toSlug(value: string) {
     .trim()
     .replace(/\s+/g, "-")
     .slice(0, 40);
-}
-
-function parseProfileHandle(url: URL, platform: "linkedin" | "x") {
-  const parts = url.pathname.split("/").filter(Boolean);
-
-  if (platform === "linkedin") {
-    if (parts[0] === "in" && parts[1]) {
-      return parts[1];
-    }
-
-    return parts[0] ?? "";
-  }
-
-  return parts[0] ?? "";
 }
 
 function cleanDisplayName(title: string | null, handle: string) {
@@ -169,16 +249,18 @@ export async function POST(req: NextRequest) {
     const parsed = schema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ ok: false, error: "Invalid URL" }, { status: 400 });
+      return NextResponse.json(
+        { ok: false, error: "Enter a LinkedIn or X profile URL or handle." },
+        { status: 400 },
+      );
     }
 
-    const inputUrl = new URL(parsed.data.url);
-
-    if (!allowedHosts.has(inputUrl.hostname.toLowerCase())) {
+    const normalized = normalizeProfileInput(parsed.data.url, parsed.data.platform);
+    if ("error" in normalized) {
       return NextResponse.json(
         {
           ok: false,
-          error: "Only LinkedIn and X profile URLs are supported right now.",
+          error: normalized.error,
         },
         { status: 400 },
       );
@@ -193,13 +275,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const platform = parsed.data.platform ?? inferPlatformFromUrl(inputUrl);
-    const analysis = await analyzeSite(parsed.data.url);
-    const handle = parseProfileHandle(inputUrl, platform);
-    const avatarUrl = await extractAvatarUrl(parsed.data.url);
+    const normalizedUrl = normalized.url.toString();
+    const platform = normalized.platform;
+    const handle = normalized.handle;
+    const analysis = await analyzeSite(normalizedUrl);
+    const avatarUrl = await extractAvatarUrl(normalizedUrl);
 
     const prefill: CreatorProfilePrefill = {
-      source_url: parsed.data.url,
+      source_url: normalizedUrl,
       source_platform: platform,
       display_name: cleanDisplayName(analysis.title, handle),
       bio: selectBio(analysis.summary, analysis.key_points),
@@ -210,7 +293,7 @@ export async function POST(req: NextRequest) {
         {
           platform,
           handle,
-          url: parsed.data.url,
+          url: normalizedUrl,
           followers: 0,
           avg_impressions: 0,
         },

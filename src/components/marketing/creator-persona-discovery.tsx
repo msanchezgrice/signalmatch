@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 const platforms = [
-  { id: "linkedin", label: "LinkedIn", example: "https://www.linkedin.com/in/your-profile" },
-  { id: "x", label: "X (Formerly Twitter)", example: "https://x.com/yourhandle" },
+  { id: "linkedin", label: "LinkedIn", example: "linkedin.com/in/your-profile or @yourname" },
+  { id: "x", label: "X (Formerly Twitter)", example: "x.com/yourhandle or @yourhandle" },
 ] as const;
 
 type Platform = (typeof platforms)[number]["id"];
@@ -23,7 +23,7 @@ export function CreatorPersonaDiscovery() {
   const [statusText, setStatusText] = useState<string | null>(null);
 
   const placeholder = useMemo(
-    () => platforms.find((item) => item.id === platform)?.example ?? "https://",
+    () => platforms.find((item) => item.id === platform)?.example ?? "@yourname",
     [platform],
   );
 
@@ -33,13 +33,6 @@ export function CreatorPersonaDiscovery() {
     const value = profileUrl.trim();
 
     if (!value) {
-      return;
-    }
-
-    try {
-      new URL(value);
-    } catch {
-      toast.error("Please enter a full profile URL including https://");
       return;
     }
 
@@ -109,7 +102,10 @@ export function CreatorPersonaDiscovery() {
             onChange={(event) => setProfileUrl(event.target.value)}
             placeholder={placeholder}
             className="h-12 rounded-xl border-zinc-200 bg-white text-base"
-            inputMode="url"
+            inputMode="text"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             disabled={isSubmitting}
           />
           <Button
@@ -131,7 +127,7 @@ export function CreatorPersonaDiscovery() {
         {statusText ? <p className="text-sm text-zinc-600">{statusText}</p> : null}
 
         <p className="text-sm text-zinc-500">
-          Tip: paste a full profile URL (including <code>https://</code>) for best results.
+          Tip: paste a profile URL, <code>www...</code> link, or just a handle like <code>@yourname</code>.
         </p>
       </form>
     </section>
