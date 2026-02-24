@@ -165,34 +165,32 @@ export function CreatorOnboardingWizard({
         channels?: Array<{ followers?: number; avg_impressions?: number }>;
       };
 
-      if (isPrimary) {
-        if (!form.getValues("display_name") && prefill.display_name) {
-          form.setValue("display_name", prefill.display_name, { shouldDirty: true });
-        }
-        if (!form.getValues("bio") && prefill.bio) {
-          form.setValue("bio", prefill.bio, { shouldDirty: true });
-        }
-        if (prefill.niches?.length) {
-          form.setValue("niches_csv", mergeCsvValues(form.getValues("niches_csv"), prefill.niches, 8), {
+      if (!form.getValues("display_name") && prefill.display_name) {
+        form.setValue("display_name", prefill.display_name, { shouldDirty: true });
+      }
+      if (!form.getValues("bio") && prefill.bio) {
+        form.setValue("bio", prefill.bio, { shouldDirty: true });
+      }
+      if (prefill.niches?.length) {
+        form.setValue("niches_csv", mergeCsvValues(form.getValues("niches_csv"), prefill.niches, 8), {
+          shouldDirty: true,
+        });
+      }
+      if (prefill.audience_tags?.length) {
+        form.setValue(
+          "audience_tags_csv",
+          mergeCsvValues(form.getValues("audience_tags_csv"), prefill.audience_tags, 8),
+          { shouldDirty: true },
+        );
+      }
+      if (prefill.tool_stack?.length) {
+        form.setValue(
+          "tool_stack_csv",
+          mergeCsvValues(form.getValues("tool_stack_csv"), prefill.tool_stack, 12),
+          {
             shouldDirty: true,
-          });
-        }
-        if (prefill.audience_tags?.length) {
-          form.setValue(
-            "audience_tags_csv",
-            mergeCsvValues(form.getValues("audience_tags_csv"), prefill.audience_tags, 8),
-            { shouldDirty: true },
-          );
-        }
-        if (prefill.tool_stack?.length) {
-          form.setValue(
-            "tool_stack_csv",
-            mergeCsvValues(form.getValues("tool_stack_csv"), prefill.tool_stack, 12),
-            {
-              shouldDirty: true,
-            },
-          );
-        }
+          },
+        );
       }
 
       const firstChannel = Array.isArray(prefill.channels) ? prefill.channels[0] : null;
