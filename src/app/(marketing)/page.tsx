@@ -87,7 +87,7 @@ export default function HomePage() {
             </Link>
           </div>
           <p className="mt-5 text-sm text-zinc-600">
-            Creator? <Link className="font-medium text-zinc-900 underline underline-offset-4" href="/creators/sign-up">Join as a creator</Link> or <Link className="font-medium text-zinc-900 underline underline-offset-4" href="/creators/sign-in">sign in</Link>.
+            Creator? <Link className="font-medium text-zinc-900 underline underline-offset-4" href="/creators">Join as a creator</Link> or <Link className="font-medium text-zinc-900 underline underline-offset-4" href="/creators/sign-in">sign in</Link>.
           </p>
         </div>
       </section>
