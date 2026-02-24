@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import {
+  CREATOR_PREFILL_COOKIE_MAX_AGE_SECONDS,
+  CREATOR_PREFILL_COOKIE_NAME,
   encodeCreatorPrefillToken,
   type CreatorProfilePrefill,
 } from "@/server/lib/creator-profile-prefill";
@@ -309,12 +311,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       ok: true,
       prefill,
       prefill_token: token,
       analysis,
     });
+
+    response.cookies.set({
+      name: CREATOR_PREFILL_COOKIE_NAME,
+      value: token,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: CREATOR_PREFILL_COOKIE_MAX_AGE_SECONDS,
+    });
+
+    return response;
   } catch (error) {
     return NextResponse.json(
       {

@@ -2,6 +2,9 @@ import "server-only";
 
 import { z } from "zod";
 
+export const CREATOR_PREFILL_COOKIE_NAME = "sm_creator_prefill";
+export const CREATOR_PREFILL_COOKIE_MAX_AGE_SECONDS = 60 * 30;
+
 const prefillChannelSchema = z.object({
   platform: z.string().min(1).max(40),
   handle: z.string().min(1).max(120),

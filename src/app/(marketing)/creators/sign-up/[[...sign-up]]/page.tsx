@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { SignUp } from "@clerk/nextjs";
+import { CREATOR_PREFILL_COOKIE_NAME } from "@/server/lib/creator-profile-prefill";
 
 const whyPeopleJoin = [
   "Make money from products you already use and trust.",
@@ -85,16 +87,19 @@ type PageProps = {
 
 export default async function CreatorSignUpPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const prefill =
+  const cookieStore = await cookies();
+  const prefillFromQuery =
     typeof params.prefill === "string" && params.prefill.length > 0
       ? params.prefill
       : null;
-  const encodedPrefill = prefill ? encodeURIComponent(prefill) : null;
-  const fallbackRedirectUrl = encodedPrefill
-    ? `/app/onboarding?role=CREATOR&prefill=${encodedPrefill}`
+  const prefillFromCookie = cookieStore.get(CREATOR_PREFILL_COOKIE_NAME)?.value ?? null;
+  const prefill = prefillFromQuery ?? prefillFromCookie;
+  const encodedQueryPrefill = prefillFromQuery ? encodeURIComponent(prefillFromQuery) : null;
+  const fallbackRedirectUrl = encodedQueryPrefill
+    ? `/app/onboarding?role=CREATOR&prefill=${encodedQueryPrefill}`
     : "/app/onboarding?role=CREATOR";
-  const signInUrl = encodedPrefill
-    ? `/creators/sign-in?prefill=${encodedPrefill}`
+  const signInUrl = encodedQueryPrefill
+    ? `/creators/sign-in?prefill=${encodedQueryPrefill}`
     : "/creators/sign-in";
 
   return (

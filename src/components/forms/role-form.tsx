@@ -55,11 +55,13 @@ const roleMeta: Record<
 export function RoleForm({
   currentRole,
   preferredRole,
-  creatorPrefillToken,
+  creatorPrefillQueryToken,
+  hasCreatorPrefill,
 }: {
   currentRole?: string | null;
   preferredRole?: "CREATOR" | "BUILDER" | null;
-  creatorPrefillToken?: string | null;
+  creatorPrefillQueryToken?: string | null;
+  hasCreatorPrefill?: boolean;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -82,8 +84,10 @@ export function RoleForm({
       }
 
       const destination =
-        role === "CREATOR" && creatorPrefillToken
-          ? `/app/creator/profile?prefill=${encodeURIComponent(creatorPrefillToken)}`
+        role === "CREATOR" && creatorPrefillQueryToken
+          ? `/app/creator/profile?prefill=${encodeURIComponent(creatorPrefillQueryToken)}`
+          : role === "CREATOR" && hasCreatorPrefill
+            ? "/app/creator/profile"
           : roleMeta[role].destination;
 
       toast.success("Workspace configured");

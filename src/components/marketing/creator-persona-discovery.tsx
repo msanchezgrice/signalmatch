@@ -52,11 +52,7 @@ export function CreatorPersonaDiscovery() {
         throw new Error(json?.error || "Could not analyze profile");
       }
 
-      const query = new URLSearchParams({
-        prefill: json.prefill_token,
-      });
-
-      router.push(`/creators/sign-up?${query.toString()}`);
+      router.push("/creators/sign-up");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not analyze profile");
       setStatusText(null);

@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,6 +6,7 @@ import { CreatorProfileForm } from "@/components/forms/creator-profile-form";
 import { getAuthContext } from "@/server/auth";
 import { getCreatorProfileByUserId } from "@/server/db/read";
 import {
+  CREATOR_PREFILL_COOKIE_NAME,
   decodeCreatorPrefillToken,
   mergeCreatorDefaults,
 } from "@/server/lib/creator-profile-prefill";
@@ -16,6 +18,7 @@ export default async function CreatorProfilePage({
 }) {
   const authContext = await getAuthContext();
   const params = await searchParams;
+  const cookieStore = await cookies();
 
   if (!authContext) {
     redirect("/");
@@ -26,10 +29,11 @@ export default async function CreatorProfilePage({
   }
 
   const profile = await getCreatorProfileByUserId(authContext.userId);
-  const prefillToken =
+  const prefillTokenFromQuery =
     typeof params.prefill === "string" && params.prefill.length > 0
       ? params.prefill
       : null;
+  const prefillToken = prefillTokenFromQuery ?? cookieStore.get(CREATOR_PREFILL_COOKIE_NAME)?.value ?? null;
   const prefill = decodeCreatorPrefillToken(prefillToken);
   const defaults = mergeCreatorDefaults(profile as any, prefill);
 
