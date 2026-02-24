@@ -95,9 +95,9 @@ export default async function CreatorSignUpPage({ searchParams }: PageProps) {
   const prefillFromCookie = cookieStore.get(CREATOR_PREFILL_COOKIE_NAME)?.value ?? null;
   const prefill = prefillFromQuery ?? prefillFromCookie;
   const encodedQueryPrefill = prefillFromQuery ? encodeURIComponent(prefillFromQuery) : null;
-  const fallbackRedirectUrl = encodedQueryPrefill
-    ? `/app/onboarding?role=CREATOR&prefill=${encodedQueryPrefill}`
-    : "/app/onboarding?role=CREATOR";
+  const redirectUrl = encodedQueryPrefill
+    ? `/app/creator/onboarding?prefill=${encodedQueryPrefill}`
+    : "/app/creator/onboarding";
   const signInUrl = encodedQueryPrefill
     ? `/creators/sign-in?prefill=${encodedQueryPrefill}`
     : "/creators/sign-in";
@@ -213,7 +213,8 @@ export default async function CreatorSignUpPage({ searchParams }: PageProps) {
                 routing="path"
                 path="/creators/sign-up"
                 signInUrl={signInUrl}
-                fallbackRedirectUrl={fallbackRedirectUrl}
+                fallbackRedirectUrl={redirectUrl}
+                forceRedirectUrl={redirectUrl}
               />
             </div>
           </div>

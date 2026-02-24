@@ -11,9 +11,9 @@ export default async function CreatorSignInPage({ searchParams }: PageProps) {
       ? params.prefill
       : null;
   const encodedQueryPrefill = prefillFromQuery ? encodeURIComponent(prefillFromQuery) : null;
-  const fallbackRedirectUrl = encodedQueryPrefill
-    ? `/app/onboarding?role=CREATOR&prefill=${encodedQueryPrefill}`
-    : "/app/onboarding?role=CREATOR";
+  const redirectUrl = encodedQueryPrefill
+    ? `/app/creator/onboarding?prefill=${encodedQueryPrefill}`
+    : "/app/creator/onboarding";
   const signUpUrl = encodedQueryPrefill
     ? `/creators/sign-up?prefill=${encodedQueryPrefill}`
     : "/creators/sign-up";
@@ -37,7 +37,8 @@ export default async function CreatorSignInPage({ searchParams }: PageProps) {
             routing="path"
             path="/creators/sign-in"
             signUpUrl={signUpUrl}
-            fallbackRedirectUrl={fallbackRedirectUrl}
+            fallbackRedirectUrl={redirectUrl}
+            forceRedirectUrl={redirectUrl}
           />
         </div>
       </div>

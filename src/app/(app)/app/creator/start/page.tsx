@@ -21,10 +21,12 @@ export default async function CreatorStartPage() {
     redirect("/app");
   }
 
-  const [profile, partnerships] = await Promise.all([
-    getCreatorProfileByUserId(authContext.userId),
-    getCreatorPartnerships(authContext.userId),
-  ]);
+  const profile = await getCreatorProfileByUserId(authContext.userId);
+  if (!profile) {
+    redirect("/app/creator/onboarding");
+  }
+
+  const partnerships = await getCreatorPartnerships(authContext.userId);
 
   const hasProfile = Boolean(profile);
   const hasActivePartnership = partnerships.some((item: any) => item.status === "active");

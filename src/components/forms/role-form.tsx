@@ -48,7 +48,7 @@ const roleMeta: Record<
       "Accept invites and share unique referral links",
       "Track payouts and connect Stripe for fast settlement",
     ],
-    destination: "/app/creator/start",
+    destination: "/app/creator/onboarding",
   },
 };
 
@@ -85,9 +85,9 @@ export function RoleForm({
 
       const destination =
         role === "CREATOR" && creatorPrefillQueryToken
-          ? `/app/creator/profile?prefill=${encodeURIComponent(creatorPrefillQueryToken)}`
+          ? `/app/creator/onboarding?prefill=${encodeURIComponent(creatorPrefillQueryToken)}`
           : role === "CREATOR" && hasCreatorPrefill
-            ? "/app/creator/profile"
+            ? "/app/creator/onboarding"
           : roleMeta[role].destination;
 
       toast.success("Workspace configured");

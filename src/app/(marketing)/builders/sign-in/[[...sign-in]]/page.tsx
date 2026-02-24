@@ -21,6 +21,7 @@ export default function BuilderSignInPage() {
             path="/builders/sign-in"
             signUpUrl="/builders/sign-up"
             fallbackRedirectUrl="/app/onboarding?role=BUILDER"
+            forceRedirectUrl="/app/onboarding?role=BUILDER"
           />
         </div>
       </div>
