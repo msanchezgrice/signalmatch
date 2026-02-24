@@ -314,6 +314,42 @@ const personaToolDefaults: Record<string, string[]> = {
   "Creators and educators": ["Canva", "CapCut", "Substack"],
 };
 
+const personaNicheDefaults: Record<string, string[]> = {
+  "Startup founders": ["startup-growth", "go-to-market", "saas"],
+  "Developers and engineers": ["developer-tools", "automation", "ai-engineering"],
+  "Marketers and growth teams": ["growth-marketing", "attribution", "demand-gen"],
+  "Sales and RevOps teams": ["sales-ops", "pipeline", "revenue-operations"],
+  "Creators and educators": ["creator-economy", "audience-growth", "content-creation"],
+};
+
+function inferNiches(
+  rawTags: string[],
+  personas: Array<{ name: string }>,
+  blockedTokens: Set<string>,
+) {
+  const output = cleanTags(rawTags, blockedTokens);
+  const seen = new Set(output.map((value) => value.toLowerCase()));
+
+  if (output.length < 3) {
+    for (const persona of personas) {
+      const defaults = personaNicheDefaults[persona.name] ?? [];
+      for (const tag of defaults) {
+        const key = tag.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          output.push(tag);
+        }
+      }
+
+      if (output.length >= 5) {
+        break;
+      }
+    }
+  }
+
+  return output.slice(0, 5);
+}
+
 function inferToolStack(corpus: string, personas: Array<{ name: string }>) {
   const found: string[] = [];
   const seen = new Set<string>();
@@ -433,6 +469,8 @@ export async function POST(req: NextRequest) {
     const blockedTokens = new Set<string>([
       ...splitTokens(handle.replace(/[._-]/g, " ")),
       ...splitTokens(displayName),
+      ...splitTokens(analysis.title ?? ""),
+      platform,
     ]);
     const analysisText = [analysis.title, analysis.summary, ...analysis.key_points]
       .filter(Boolean)
@@ -446,7 +484,7 @@ export async function POST(req: NextRequest) {
       display_name: displayName,
       bio: selectBio(analysis.summary, analysis.key_points),
       avatar_url: avatarUrl ?? undefined,
-      niches: cleanTags(analysis.category_tags, blockedTokens),
+      niches: inferNiches(analysis.category_tags, analysis.target_personas, blockedTokens),
       audience_tags: inferAudienceTags(analysis.target_personas),
       tool_stack: toolStack,
       channels: [
