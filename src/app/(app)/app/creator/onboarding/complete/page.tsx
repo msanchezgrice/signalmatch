@@ -93,5 +93,5 @@ export default async function CreatorOnboardingCompletePage({
     channels: parsed.data.channels,
   });
 
-  redirect("/app/creator/start");
+  redirect("/app/creator/deals?onboarding=1");
 }
