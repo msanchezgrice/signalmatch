@@ -35,6 +35,19 @@ function getClientIdentifier(req: NextRequest) {
   return first || "anonymous";
 }
 
+function resolveCookieDomain(req: NextRequest) {
+  const host = (req.headers.get("host") ?? "").split(":")[0]?.toLowerCase();
+  if (!host) {
+    return undefined;
+  }
+
+  if (host === "signalmatch.me" || host === "www.signalmatch.me" || host.endsWith(".signalmatch.me")) {
+    return ".signalmatch.me";
+  }
+
+  return undefined;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const rateKey = `public-creator-onboarding-draft:${getClientIdentifier(req)}`;
@@ -77,6 +90,7 @@ export async function POST(req: NextRequest) {
     }
 
     const response = NextResponse.json({ ok: true });
+    const cookieDomain = resolveCookieDomain(req);
 
     response.cookies.set({
       name: CREATOR_PREFILL_COOKIE_NAME,
@@ -86,6 +100,7 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       path: "/",
       maxAge: CREATOR_PREFILL_COOKIE_MAX_AGE_SECONDS,
+      domain: cookieDomain,
     });
 
     return response;
