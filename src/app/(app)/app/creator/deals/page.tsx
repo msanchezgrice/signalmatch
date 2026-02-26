@@ -40,24 +40,24 @@ export default async function CreatorDealsPage({
         ) : null}
       </div>
       {fromOnboarding ? (
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm app-muted-text">
           Onboarding complete. These are the best-fit partners to start with based on your profile.
         </p>
       ) : null}
       <div className="grid gap-4 md:grid-cols-2">
         {deals.length === 0 ? (
-          <Card className="border-zinc-200/80 bg-white/95 md:col-span-2">
-            <CardContent className="py-8 text-sm text-zinc-600">
+          <Card className="app-surface md:col-span-2">
+            <CardContent className="py-8 text-sm app-muted-text">
               No partner suggestions yet. Check back soon or continue to your dashboard.
             </CardContent>
           </Card>
         ) : null}
         {deals.map((deal: any) => (
-          <Card key={deal.id} className="border-zinc-200/80 bg-white/95">
+          <Card key={deal.id} className="app-surface">
             <CardHeader>
               <CardTitle className="text-lg">{deal.title}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm text-zinc-600">
+            <CardContent className="space-y-2 text-sm app-muted-text">
               <p>{deal.brief || "No brief"}</p>
               <p>CPA: ${(deal.cpa_amount_cents / 100).toFixed(2)}</p>
             </CardContent>

@@ -31,11 +31,11 @@ export default async function BuilderCampaignsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         {campaigns.map((campaign: any) => (
           <Link key={campaign.id} href={`/app/builder/campaigns/${campaign.id}`}>
-            <Card className="border-zinc-200/80 bg-white/95 transition hover:-translate-y-0.5 hover:shadow-md">
+            <Card className="app-surface transition hover:-translate-y-0.5 hover:shadow-md">
               <CardHeader>
                 <CardTitle className="text-lg">{campaign.title}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm text-zinc-600">
+              <CardContent className="space-y-2 text-sm app-muted-text">
                 <p>Product: {campaign.product_name}</p>
                 <p>Status: {campaign.status}</p>
                 <p>Budget available: ${(campaign.budget_available_cents / 100).toFixed(2)}</p>

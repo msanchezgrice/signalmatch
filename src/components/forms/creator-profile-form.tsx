@@ -120,7 +120,7 @@ export function CreatorProfileForm({
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+      <div className="rounded-xl border app-muted-surface p-3 text-sm app-muted-text">
         Step {step} of 2
       </div>
 
@@ -146,7 +146,7 @@ export function CreatorProfileForm({
                 Niches
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-zinc-500 hover:text-zinc-800">
+                    <button type="button" className="app-subtle-text hover:text-[var(--app-text)]">
                       <Info className="h-3.5 w-3.5" />
                     </button>
                   </TooltipTrigger>
@@ -173,7 +173,7 @@ export function CreatorProfileForm({
             <div>
               <label className="mb-1 block text-sm font-medium">Primary platform</label>
               <select
-                className="w-full rounded-md border border-zinc-200 bg-white p-2 text-sm"
+                className="w-full rounded-md border app-surface p-2 text-sm"
                 {...form.register("platform")}
               >
                 <option value="x">X</option>

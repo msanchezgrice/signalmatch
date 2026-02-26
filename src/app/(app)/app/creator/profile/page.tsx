@@ -38,12 +38,12 @@ export default async function CreatorProfilePage({
   const defaults = mergeCreatorDefaults(profile as any, prefill);
 
   return (
-    <Card className="border-zinc-200/80 bg-white/95">
+    <Card className="app-surface">
       <CardHeader>
         <CardTitle>Creator profile</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 text-sm text-zinc-600">
+        <p className="mb-4 text-sm app-muted-text">
           Complete this in two steps so builders can match you to high-fit campaigns.
         </p>
         {prefill ? (

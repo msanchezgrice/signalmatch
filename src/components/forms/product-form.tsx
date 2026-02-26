@@ -119,7 +119,7 @@ export function ProductForm() {
 
   return (
     <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+      <div className="rounded-xl border app-muted-surface p-3 text-sm app-muted-text">
         Step {step} of 2
       </div>
 
@@ -130,7 +130,7 @@ export function ProductForm() {
               Website URL
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button type="button" className="text-zinc-500 hover:text-zinc-800">
+                  <button type="button" className="app-subtle-text hover:text-[var(--app-text)]">
                     <Info className="h-3.5 w-3.5" />
                   </button>
                 </TooltipTrigger>
@@ -158,17 +158,17 @@ export function ProductForm() {
           </div>
 
           {analysis ? (
-            <Card className="border-zinc-200/80 bg-white/95">
+            <Card className="app-surface">
               <CardHeader>
                 <CardTitle className="text-base">Analyzer output</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm text-zinc-600">
+              <CardContent className="space-y-3 text-sm app-muted-text">
                 <div>
-                  <p className="font-medium text-zinc-900">Suggested summary</p>
+                  <p className="font-medium app-strong-text">Suggested summary</p>
                   <p>{analysis.summary || "No summary extracted."}</p>
                 </div>
                 <div>
-                  <p className="font-medium text-zinc-900">Core points</p>
+                  <p className="font-medium app-strong-text">Core points</p>
                   <ul className="list-disc space-y-1 pl-5">
                     {analysis.key_points.slice(0, 4).map((point) => (
                       <li key={point}>{point}</li>
@@ -176,11 +176,11 @@ export function ProductForm() {
                   </ul>
                 </div>
                 <div>
-                  <p className="font-medium text-zinc-900">Target personas</p>
+                  <p className="font-medium app-strong-text">Target personas</p>
                   <ul className="space-y-1">
                     {analysis.target_personas.map((persona) => (
                       <li key={persona.name}>
-                        <span className="font-medium text-zinc-900">{persona.name}:</span>{" "}
+                        <span className="font-medium app-strong-text">{persona.name}:</span>{" "}
                         {persona.rationale}
                       </li>
                     ))}
@@ -214,7 +214,7 @@ export function ProductForm() {
           <div>
             <label className="mb-1 block text-sm font-medium">Pricing model</label>
             <select
-              className="w-full rounded-md border border-zinc-200 bg-white p-2 text-sm"
+              className="w-full rounded-md border app-surface p-2 text-sm"
               {...form.register("pricing_type")}
             >
               <option value="free">Free</option>

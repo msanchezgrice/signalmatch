@@ -23,12 +23,12 @@ export default async function NewCampaignPage() {
   }
 
   return (
-    <Card className="border-zinc-200/80 bg-white/95">
+    <Card className="app-surface">
       <CardHeader>
         <CardTitle>Create campaign</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 text-sm text-zinc-600">
+        <p className="mb-4 text-sm app-muted-text">
           Use the guided setup to define conversion quality, approval controls,
           and budget constraints before inviting creators.
         </p>

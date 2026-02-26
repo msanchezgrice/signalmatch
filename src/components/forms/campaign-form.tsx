@@ -78,7 +78,7 @@ export function CampaignForm({ products }: { products: Array<{ id: string; name:
 
   return (
     <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-600">
+      <div className="rounded-xl border app-muted-surface p-3 text-sm app-muted-text">
         Step {step} of 2
       </div>
 
@@ -86,7 +86,7 @@ export function CampaignForm({ products }: { products: Array<{ id: string; name:
         <div className="space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium">Product</label>
-            <select className="w-full rounded-md border bg-white p-2" {...form.register("product_id")}>
+            <select className="w-full rounded-md border app-surface p-2" {...form.register("product_id")}>
               {products.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name}
@@ -109,7 +109,7 @@ export function CampaignForm({ products }: { products: Array<{ id: string; name:
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium">Conversion type</label>
-              <select className="w-full rounded-md border bg-white p-2" {...form.register("conversion_type")}>
+              <select className="w-full rounded-md border app-surface p-2" {...form.register("conversion_type")}>
                 <option value="signup">Signup</option>
                 <option value="activation">Activation</option>
               </select>
@@ -119,7 +119,7 @@ export function CampaignForm({ products }: { products: Array<{ id: string; name:
                 Approval mode
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-zinc-500 hover:text-zinc-800">
+                    <button type="button" className="app-subtle-text hover:text-[var(--app-text)]">
                       <Info className="h-3.5 w-3.5" />
                     </button>
                   </TooltipTrigger>
@@ -128,7 +128,7 @@ export function CampaignForm({ products }: { products: Array<{ id: string; name:
                   </TooltipContent>
                 </Tooltip>
               </label>
-              <select className="w-full rounded-md border bg-white p-2" {...form.register("approval_mode")}>
+              <select className="w-full rounded-md border app-surface p-2" {...form.register("approval_mode")}>
                 <option value="manual">Manual</option>
                 <option value="auto">Auto</option>
               </select>
@@ -162,7 +162,7 @@ export function CampaignForm({ products }: { products: Array<{ id: string; name:
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium">Campaign status</label>
-              <select className="w-full rounded-md border bg-white p-2" {...form.register("status")}>
+              <select className="w-full rounded-md border app-surface p-2" {...form.register("status")}>
                 <option value="draft">Draft</option>
                 <option value="active">Active</option>
                 <option value="paused">Paused</option>

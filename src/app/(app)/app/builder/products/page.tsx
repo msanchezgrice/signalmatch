@@ -31,11 +31,11 @@ export default async function BuilderProductsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {products.map((product: any) => (
-          <Card key={product.id} className="border-zinc-200/80 bg-white/95">
+          <Card key={product.id} className="app-surface">
             <CardHeader>
               <CardTitle className="text-lg">{product.name}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm text-zinc-600">
+            <CardContent className="space-y-2 text-sm app-muted-text">
               <p>{product.url}</p>
               <p>{product.description || "No description"}</p>
               <ActionButton

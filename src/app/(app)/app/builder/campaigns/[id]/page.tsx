@@ -40,11 +40,11 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
 
   return (
     <div className="space-y-5">
-      <Card className="border-zinc-200/80 bg-white/95">
+      <Card className="app-surface">
         <CardHeader>
           <CardTitle className="text-2xl">{campaign.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-zinc-600">
+        <CardContent className="space-y-2 text-sm app-muted-text">
           <p>{campaign.brief || "No brief"}</p>
           <p>Budget available: ${(campaign.budget_available_cents / 100).toFixed(2)}</p>
           <ActionButton
@@ -56,25 +56,25 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-zinc-200/80 bg-white/95">
+        <Card className="app-surface">
           <CardHeader>
             <CardTitle className="text-base">Clicks</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">{analytics?.clicks ?? 0}</CardContent>
         </Card>
-        <Card className="border-zinc-200/80 bg-white/95">
+        <Card className="app-surface">
           <CardHeader>
             <CardTitle className="text-base">Approved</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">{analytics?.approved_conversions ?? 0}</CardContent>
         </Card>
-        <Card className="border-zinc-200/80 bg-white/95">
+        <Card className="app-surface">
           <CardHeader>
             <CardTitle className="text-base">Pending</CardTitle>
           </CardHeader>
           <CardContent className="text-2xl font-semibold">{analytics?.pending_conversions ?? 0}</CardContent>
         </Card>
-        <Card className="border-zinc-200/80 bg-white/95">
+        <Card className="app-surface">
           <CardHeader>
             <CardTitle className="text-base">Paid out</CardTitle>
           </CardHeader>
@@ -84,15 +84,15 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
         </Card>
       </div>
 
-      <Card className="border-zinc-200/80 bg-white/95">
+      <Card className="app-surface">
         <CardHeader>
           <CardTitle>Invite creators</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           {creators.creators.map((creator) => (
-            <div key={creator.creator_profile_id} className="rounded-lg border border-zinc-200 p-3">
+            <div key={creator.creator_profile_id} className="rounded-lg border app-surface p-3">
               <p className="font-medium">{creator.display_name}</p>
-              <p className="mb-2 text-xs text-zinc-500">{creator.niches.join(", ") || "n/a"}</p>
+              <p className="mb-2 text-xs app-subtle-text">{creator.niches.join(", ") || "n/a"}</p>
               <ActionButton
                 label="Invite"
                 action={`/api/builder/campaigns/${id}/invite`}
@@ -110,7 +110,7 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      <Card className="border-zinc-200/80 bg-white/95">
+      <Card className="app-surface">
         <CardHeader>
           <CardTitle>Partnerships</CardTitle>
         </CardHeader>
@@ -126,7 +126,7 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      <Card className="border-zinc-200/80 bg-white/95">
+      <Card className="app-surface">
         <CardHeader>
           <CardTitle>Conversions</CardTitle>
         </CardHeader>

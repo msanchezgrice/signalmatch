@@ -31,11 +31,11 @@ export default async function CreatorPayoutsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {payouts.map((payout: any) => (
-          <Card key={payout.id} className="border-zinc-200/80 bg-white/95">
+          <Card key={payout.id} className="app-surface">
             <CardHeader>
               <CardTitle className="text-lg">{payout.title}</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm text-zinc-600">
+            <CardContent className="space-y-2 text-sm app-muted-text">
               <p>Amount: ${(payout.amount_cents / 100).toFixed(2)}</p>
               <p>Status: {payout.status}</p>
               <p>Transfer: {payout.stripe_transfer_id || "n/a"}</p>

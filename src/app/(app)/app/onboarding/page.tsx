@@ -63,7 +63,7 @@ export default async function OnboardingPage({
       <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
         Choose your SignalMatch workspace
       </h1>
-      <p className="max-w-2xl text-zinc-600">
+      <p className="max-w-2xl app-muted-text">
         Builder and creator experiences are intentionally separated so each side
         sees only the workflows relevant to them.
       </p>

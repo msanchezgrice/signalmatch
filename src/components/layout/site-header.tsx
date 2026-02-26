@@ -15,32 +15,32 @@ export function SiteHeader() {
   const onCreatorAuthFlow = onCreatorSignUp || onCreatorSignIn;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-zinc-200/70 bg-white/85 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b app-chrome-header backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" className="text-lg font-semibold tracking-tight">
             SignalMatch
           </Link>
           {!onCreatorAuthFlow ? (
-            <nav className="hidden items-center gap-5 text-sm text-zinc-600 md:flex">
+            <nav className="hidden items-center gap-5 text-sm app-muted-text md:flex">
               {isCreatorFlow ? (
                 <>
-                  <Link href="/creators/success-stories" className="hover:text-zinc-900">
+                  <Link href="/creators/success-stories" className="hover:text-[var(--app-text)]">
                     Success Stories
                   </Link>
-                  <Link href="/explore/campaigns" className="hover:text-zinc-900">
+                  <Link href="/explore/campaigns" className="hover:text-[var(--app-text)]">
                     Products Shared
                   </Link>
-                  <Link href="/creators" className="hover:text-zinc-900">
+                  <Link href="/creators" className="hover:text-[var(--app-text)]">
                     How It Works
                   </Link>
                 </>
               ) : (
                 <>
-                <Link href="/explore/creators" className="hover:text-zinc-900">
+                <Link href="/explore/creators" className="hover:text-[var(--app-text)]">
                   Creator Directory
                 </Link>
-                <Link href="/builders" className="hover:text-zinc-900">
+                <Link href="/builders" className="hover:text-[var(--app-text)]">
                   How It Works
                 </Link>
                 </>

@@ -291,11 +291,11 @@ export function CreatorOnboardingWizard({
 
   return (
     <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-      <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-zinc-500">
+      <div className="rounded-2xl border app-muted-surface p-4">
+        <p className="text-xs font-medium uppercase tracking-[0.16em] app-subtle-text">
           Step {step} of 3
         </p>
-        <p className="mt-1 text-lg font-semibold text-zinc-900">{stepTitle}</p>
+        <p className="mt-1 text-lg font-semibold app-strong-text">{stepTitle}</p>
       </div>
 
       {step === 1 ? (
@@ -326,7 +326,7 @@ export function CreatorOnboardingWizard({
                 Interests / niches
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-zinc-500 hover:text-zinc-800">
+                    <button type="button" className="app-subtle-text hover:text-[var(--app-text)]">
                       <Info className="h-3.5 w-3.5" />
                     </button>
                   </TooltipTrigger>
@@ -350,7 +350,7 @@ export function CreatorOnboardingWizard({
               placeholder="chatgpt, claude, cursor, notion, canva"
               {...form.register("tool_stack_csv")}
             />
-            <p className="mt-1 text-xs text-zinc-500">
+            <p className="mt-1 text-xs app-subtle-text">
               We use this to match you with products you already understand and trust.
             </p>
           </div>
@@ -359,13 +359,13 @@ export function CreatorOnboardingWizard({
 
       {step === 2 ? (
         <section className="space-y-5">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-            <p className="text-sm font-semibold text-zinc-900">Primary channel</p>
+          <div className="rounded-2xl border app-surface p-4">
+            <p className="text-sm font-semibold app-strong-text">Primary channel</p>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium">Platform</label>
                 <select
-                  className="w-full rounded-md border border-zinc-200 bg-white p-2 text-sm"
+                  className="w-full rounded-md border app-surface p-2 text-sm"
                   {...form.register("primary_platform")}
                 >
                   <option value="x">X</option>
@@ -398,13 +398,13 @@ export function CreatorOnboardingWizard({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-            <p className="text-sm font-semibold text-zinc-900">Secondary channel (optional)</p>
+          <div className="rounded-2xl border app-surface p-4">
+            <p className="text-sm font-semibold app-strong-text">Secondary channel (optional)</p>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium">Platform</label>
                 <select
-                  className="w-full rounded-md border border-zinc-200 bg-white p-2 text-sm"
+                  className="w-full rounded-md border app-surface p-2 text-sm"
                   {...form.register("secondary_platform")}
                 >
                   <option value="linkedin">LinkedIn</option>
@@ -444,8 +444,8 @@ export function CreatorOnboardingWizard({
 
       {step === 3 ? (
         <section className="space-y-5">
-          <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-            <p className="text-sm font-semibold text-zinc-900">Primary channel reach</p>
+          <div className="rounded-2xl border app-surface p-4">
+            <p className="text-sm font-semibold app-strong-text">Primary channel reach</p>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium">Follower count</label>
@@ -466,8 +466,8 @@ export function CreatorOnboardingWizard({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-zinc-200 bg-white p-4">
-            <p className="text-sm font-semibold text-zinc-900">Secondary channel reach (optional)</p>
+          <div className="rounded-2xl border app-surface p-4">
+            <p className="text-sm font-semibold app-strong-text">Secondary channel reach (optional)</p>
             <div className="mt-3 grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium">Follower count</label>

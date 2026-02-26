@@ -16,12 +16,12 @@ export default async function NewProductPage() {
   }
 
   return (
-    <Card className="border-zinc-200/80 bg-white/95">
+    <Card className="app-surface">
       <CardHeader>
         <CardTitle>Create product</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 text-sm text-zinc-600">
+        <p className="mb-4 text-sm app-muted-text">
           Start with your website URL to auto-extract messaging, category tags,
           and likely target personas.
         </p>

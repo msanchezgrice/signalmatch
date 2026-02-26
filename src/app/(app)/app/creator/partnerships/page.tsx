@@ -29,11 +29,11 @@ export default async function CreatorPartnershipsPage() {
 
   return (
     <div className="space-y-5">
-      <Card className="border-zinc-200/80 bg-white/95">
+      <Card className="app-surface">
         <CardHeader>
           <CardTitle className="text-2xl tracking-tight">Creator partnerships</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm text-zinc-600">
+        <CardContent className="space-y-2 text-sm app-muted-text">
           <p>Accept invites you trust, use your referral links, and track which campaigns are active.</p>
           <div className="flex flex-wrap gap-2">
             <Badge variant="secondary">{invited.length} invited</Badge>
@@ -50,20 +50,20 @@ export default async function CreatorPartnershipsPage() {
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {invited.length === 0 ? (
-            <Card className="border-zinc-200/80 bg-white/95 md:col-span-2">
-              <CardContent className="py-8 text-sm text-zinc-600">
+            <Card className="app-surface md:col-span-2">
+              <CardContent className="py-8 text-sm app-muted-text">
                 No pending invites right now. Keep your profile updated so builders can discover you.
               </CardContent>
             </Card>
           ) : null}
           {invited.map((partnership: any) => (
-            <Card key={partnership.id} className="border-zinc-200/80 bg-white/95">
+            <Card key={partnership.id} className="app-surface">
               <CardHeader>
                 <CardTitle className="text-lg">{partnership.title}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-sm text-zinc-600">
+              <CardContent className="space-y-3 text-sm app-muted-text">
                 <p>
-                  Product: <span className="font-medium text-zinc-900">{partnership.product_name}</span>
+                  Product: <span className="font-medium app-strong-text">{partnership.product_name}</span>
                 </p>
                 <p>CPA: ${(partnership.cpa_amount_cents / 100).toFixed(2)}</p>
                 <ActionButton
@@ -83,8 +83,8 @@ export default async function CreatorPartnershipsPage() {
         </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {active.length === 0 ? (
-            <Card className="border-zinc-200/80 bg-white/95 md:col-span-2">
-              <CardContent className="py-8 text-sm text-zinc-600">
+            <Card className="app-surface md:col-span-2">
+              <CardContent className="py-8 text-sm app-muted-text">
                 Accept an invite to start sharing referral links.
               </CardContent>
             </Card>
@@ -92,17 +92,17 @@ export default async function CreatorPartnershipsPage() {
           {active.map((partnership: any) => {
             const link = `${env.NEXT_PUBLIC_APP_URL}/r/${partnership.ref_code}`;
             return (
-              <Card key={partnership.id} className="border-zinc-200/80 bg-white/95">
+              <Card key={partnership.id} className="app-surface">
                 <CardHeader>
                   <CardTitle className="text-lg">{partnership.title}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-sm text-zinc-600">
+                <CardContent className="space-y-3 text-sm app-muted-text">
                   <p>
-                    Product: <span className="font-medium text-zinc-900">{partnership.product_name}</span>
+                    Product: <span className="font-medium app-strong-text">{partnership.product_name}</span>
                   </p>
                   <p>CPA: ${(partnership.cpa_amount_cents / 100).toFixed(2)}</p>
-                  <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-                    <p className="mb-1 flex items-center gap-1.5 font-medium text-zinc-900">
+                  <div className="rounded-lg border app-muted-surface p-3">
+                    <p className="mb-1 flex items-center gap-1.5 font-medium app-strong-text">
                       <Link2 className="h-4 w-4" />
                       Referral link
                     </p>
@@ -120,19 +120,19 @@ export default async function CreatorPartnershipsPage() {
         <h2 className="text-lg font-semibold">Completed or other statuses</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {others.map((partnership: any) => (
-            <Card key={partnership.id} className="border-zinc-200/80 bg-white/95">
+            <Card key={partnership.id} className="app-surface">
               <CardHeader>
                 <CardTitle className="text-lg">{partnership.title}</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm text-zinc-600">
+              <CardContent className="space-y-2 text-sm app-muted-text">
                 <p>Status: {partnership.status}</p>
                 <p>CPA: ${(partnership.cpa_amount_cents / 100).toFixed(2)}</p>
               </CardContent>
             </Card>
           ))}
           {others.length === 0 ? (
-            <Card className="border-zinc-200/80 bg-white/95 md:col-span-2">
-              <CardContent className="py-8 text-sm text-zinc-600">
+            <Card className="app-surface md:col-span-2">
+              <CardContent className="py-8 text-sm app-muted-text">
                 No completed partnerships yet.
               </CardContent>
             </Card>
