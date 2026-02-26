@@ -88,3 +88,226 @@
       radial-gradient(circle at 80% 0, rgba(255, 190, 80, 0.1), transparent 28%);
   }
 }
+
+@layer base {
+  .app-theme-builder {
+    --app-bg: oklch(0.98 0.015 206);
+    --app-bg-accent-1: rgba(11, 148, 137, 0.15);
+    --app-bg-accent-2: rgba(59, 130, 246, 0.12);
+    --app-surface: rgba(255, 255, 255, 0.88);
+    --app-muted-surface: rgba(236, 246, 255, 0.78);
+    --app-border: rgba(27, 61, 98, 0.15);
+    --app-border-strong: rgba(27, 61, 98, 0.24);
+    --app-text: oklch(0.24 0.03 245);
+    --app-muted-text: oklch(0.5 0.03 238);
+    --app-subtle-text: oklch(0.58 0.02 238);
+    --app-link: oklch(0.45 0.1 220);
+    --app-primary: oklch(0.56 0.14 188);
+    --app-primary-foreground: oklch(0.98 0 0);
+    --app-accent: oklch(0.93 0.04 201);
+    --app-accent-foreground: oklch(0.33 0.04 220);
+    --app-ring: oklch(0.64 0.12 188);
+  }
+
+  .app-theme-creator {
+    --app-bg: oklch(0.98 0.018 34);
+    --app-bg-accent-1: rgba(236, 72, 153, 0.16);
+    --app-bg-accent-2: rgba(245, 158, 11, 0.14);
+    --app-surface: rgba(255, 252, 252, 0.9);
+    --app-muted-surface: rgba(255, 241, 244, 0.78);
+    --app-border: rgba(122, 52, 92, 0.16);
+    --app-border-strong: rgba(122, 52, 92, 0.26);
+    --app-text: oklch(0.25 0.04 350);
+    --app-muted-text: oklch(0.5 0.04 340);
+    --app-subtle-text: oklch(0.6 0.03 340);
+    --app-link: oklch(0.5 0.15 330);
+    --app-primary: oklch(0.63 0.2 346);
+    --app-primary-foreground: oklch(0.98 0 0);
+    --app-accent: oklch(0.94 0.05 19);
+    --app-accent-foreground: oklch(0.35 0.07 332);
+    --app-ring: oklch(0.68 0.17 338);
+  }
+
+  .app-theme-neutral {
+    --app-bg: oklch(0.98 0.01 240);
+    --app-bg-accent-1: rgba(108, 99, 255, 0.1);
+    --app-bg-accent-2: rgba(71, 203, 196, 0.12);
+    --app-surface: rgba(255, 255, 255, 0.9);
+    --app-muted-surface: rgba(240, 244, 251, 0.78);
+    --app-border: rgba(49, 62, 92, 0.14);
+    --app-border-strong: rgba(49, 62, 92, 0.22);
+    --app-text: oklch(0.24 0.03 245);
+    --app-muted-text: oklch(0.5 0.03 238);
+    --app-subtle-text: oklch(0.58 0.02 238);
+    --app-link: oklch(0.45 0.1 220);
+    --app-primary: oklch(0.56 0.11 240);
+    --app-primary-foreground: oklch(0.98 0 0);
+    --app-accent: oklch(0.93 0.03 228);
+    --app-accent-foreground: oklch(0.33 0.04 220);
+    --app-ring: oklch(0.62 0.1 240);
+  }
+
+  .app-theme-builder,
+  .app-theme-creator,
+  .app-theme-neutral {
+    --background: var(--app-bg);
+    --foreground: var(--app-text);
+    --card: var(--app-surface);
+    --card-foreground: var(--app-text);
+    --popover: var(--app-surface);
+    --popover-foreground: var(--app-text);
+    --primary: var(--app-primary);
+    --primary-foreground: var(--app-primary-foreground);
+    --secondary: var(--app-muted-surface);
+    --secondary-foreground: var(--app-text);
+    --muted: var(--app-muted-surface);
+    --muted-foreground: var(--app-muted-text);
+    --accent: var(--app-accent);
+    --accent-foreground: var(--app-accent-foreground);
+    --border: var(--app-border);
+    --input: var(--app-border);
+    --ring: var(--app-ring);
+  }
+}
+
+@layer utilities {
+  .app-shell {
+    background:
+      radial-gradient(circle at 22% -10%, var(--app-bg-accent-1), transparent 34%),
+      radial-gradient(circle at 85% -6%, var(--app-bg-accent-2), transparent 30%),
+      var(--app-bg);
+    color: var(--app-text);
+  }
+
+  .app-chrome-header {
+    border-bottom: 1px solid var(--app-border);
+    background: color-mix(in srgb, var(--app-surface) 78%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  .app-nav-link {
+    color: var(--app-muted-text);
+    transition: color 160ms ease;
+  }
+
+  .app-nav-link:hover {
+    color: var(--app-text);
+  }
+
+  .app-surface {
+    border-color: var(--app-border) !important;
+    background: var(--app-surface) !important;
+  }
+
+  .app-muted-surface {
+    border-color: var(--app-border) !important;
+    background: var(--app-muted-surface) !important;
+  }
+
+  .app-muted-text {
+    color: var(--app-muted-text) !important;
+  }
+
+  .app-subtle-text {
+    color: var(--app-subtle-text) !important;
+  }
+
+  .app-strong-text {
+    color: var(--app-text) !important;
+  }
+
+  .app-shell .border-zinc-200,
+  .app-shell .border-zinc-200\/70,
+  .app-shell .border-zinc-200\/80 {
+    border-color: var(--app-border) !important;
+  }
+
+  .app-shell .bg-white,
+  .app-shell .bg-white\/85,
+  .app-shell .bg-white\/90,
+  .app-shell .bg-white\/95 {
+    background-color: var(--app-surface) !important;
+  }
+
+  .app-shell .bg-zinc-50,
+  .app-shell .bg-zinc-50\/80 {
+    background-color: var(--app-muted-surface) !important;
+  }
+
+  .app-shell .text-zinc-500 {
+    color: var(--app-subtle-text) !important;
+  }
+
+  .app-shell .text-zinc-600,
+  .app-shell .text-zinc-700 {
+    color: var(--app-muted-text) !important;
+  }
+
+  .app-shell .text-zinc-800,
+  .app-shell .text-zinc-900 {
+    color: var(--app-text) !important;
+  }
+
+  .app-shell .hover\:text-zinc-800:hover,
+  .app-shell .hover\:text-zinc-900:hover {
+    color: var(--app-text) !important;
+  }
+
+  .app-shell .hover\:border-zinc-300:hover {
+    border-color: var(--app-border-strong) !important;
+  }
+
+  .app-shell .rounded-lg.border.border-zinc-200.p-3 {
+    border-color: var(--app-border) !important;
+    background: var(--app-muted-surface) !important;
+  }
+
+  .marketing-shell {
+    background:
+      radial-gradient(circle at 18% -8%, var(--app-bg-accent-1), transparent 30%),
+      radial-gradient(circle at 86% -10%, var(--app-bg-accent-2), transparent 27%),
+      var(--app-bg);
+    color: var(--app-text);
+  }
+
+  .marketing-shell .border-zinc-200,
+  .marketing-shell .border-zinc-200\/70,
+  .marketing-shell .border-zinc-200\/80 {
+    border-color: var(--app-border) !important;
+  }
+
+  .marketing-shell .bg-white,
+  .marketing-shell .bg-white\/85,
+  .marketing-shell .bg-white\/90,
+  .marketing-shell .bg-white\/95 {
+    background-color: var(--app-surface) !important;
+  }
+
+  .marketing-shell .bg-zinc-50,
+  .marketing-shell .bg-zinc-50\/80 {
+    background-color: var(--app-muted-surface) !important;
+  }
+
+  .marketing-shell .text-zinc-500 {
+    color: var(--app-subtle-text) !important;
+  }
+
+  .marketing-shell .text-zinc-600,
+  .marketing-shell .text-zinc-700 {
+    color: var(--app-muted-text) !important;
+  }
+
+  .marketing-shell .text-zinc-800,
+  .marketing-shell .text-zinc-900 {
+    color: var(--app-text) !important;
+  }
+
+  .marketing-shell .hover\:text-zinc-800:hover,
+  .marketing-shell .hover\:text-zinc-900:hover {
+    color: var(--app-text) !important;
+  }
+
+  .marketing-shell .hover\:border-zinc-300:hover {
+    border-color: var(--app-border-strong) !important;
+  }
+}

@@ -29,16 +29,36 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ]
         : [{ href: "/app/onboarding", label: "Get Started" }];
 
+  const roleThemeClass =
+    authContext.role === "BUILDER"
+      ? "app-theme-builder"
+      : authContext.role === "CREATOR"
+        ? "app-theme-creator"
+        : "app-theme-neutral";
+
+  const roleBadge =
+    authContext.role === "BUILDER"
+      ? "Builder"
+      : authContext.role === "CREATOR"
+        ? "Creator"
+        : "Onboarding";
+
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-zinc-200/70 bg-white/90 backdrop-blur">
+    <div className={`app-shell ${roleThemeClass} min-h-screen`}>
+      <header className="app-chrome-header">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-8">
           <div className="flex items-center gap-5 text-sm">
-            <Link href="/" className="font-semibold">
-              SignalMatch
+            <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight app-strong-text">
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary text-[10px] font-bold text-primary-foreground">
+                SM
+              </span>
+              <span>SignalMatch</span>
             </Link>
+            <span className="rounded-full border px-2 py-0.5 text-xs app-subtle-text">
+              {roleBadge}
+            </span>
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href}>
+              <Link key={link.href} href={link.href} className="app-nav-link">
                 {link.label}
               </Link>
             ))}

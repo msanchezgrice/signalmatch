@@ -9,13 +9,16 @@ import { SiteHeader } from "@/components/layout/site-header";
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const useCustomShell = pathname === "/" || pathname === "/creators";
+  const isCreatorFlow =
+    pathname.startsWith("/creators") || pathname.startsWith("/explore/campaigns");
+  const flowThemeClass = isCreatorFlow ? "app-theme-creator" : "app-theme-builder";
 
   if (useCustomShell) {
-    return <div className="min-h-screen bg-transparent">{children}</div>;
+    return <div className={`marketing-shell ${flowThemeClass} min-h-screen bg-transparent`}>{children}</div>;
   }
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <div className={`marketing-shell ${flowThemeClass} min-h-screen bg-transparent`}>
       <SiteHeader />
       <main>{children}</main>
       <SiteFooter />
