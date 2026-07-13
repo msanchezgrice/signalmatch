@@ -5,26 +5,26 @@ import { Button } from "@/components/ui/button";
 
 const stories = [
   {
-    creator: "Nia Park",
+    creator: "Illustrative creator A",
     audience: "Marketing and GTM teams",
     product: "AI Meeting Prep Assistant",
-    result: "$640 earned in 5 weeks",
+    result: "Hypothetical five-week CPA scenario",
     detail:
       "Shared practical short-form workflows on TikTok and X. Accepted only one product she already used in her own stack.",
   },
   {
-    creator: "Mateo Lin",
+    creator: "Illustrative creator B",
     audience: "Indie hackers and technical founders",
     product: "Agentic coding copilot",
-    result: "52 approved signups",
+    result: "Hypothetical approved-signup scenario",
     detail:
       "Posted technical implementation threads and one live demo. High audience-product fit drove strong conversion quality.",
   },
   {
-    creator: "Elena Brooks",
+    creator: "Illustrative creator C",
     audience: "Growth and analytics leads",
     product: "Experiment tracking platform",
-    result: "$480 earned from activation campaign",
+    result: "Hypothetical activation campaign",
     detail:
       "Built one LinkedIn carousel and one newsletter breakdown focused on the exact activation criteria.",
   },
@@ -41,12 +41,12 @@ export default function CreatorSuccessStoriesPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-20">
       <section className="rounded-[2rem] bg-gradient-to-br from-rose-100 via-orange-50 to-amber-100 p-7 md:p-10">
-        <Badge className="bg-zinc-900/90 text-white hover:bg-zinc-900">Creator success stories</Badge>
+        <Badge className="bg-zinc-900/90 text-white hover:bg-zinc-900">Illustrative campaign scenarios</Badge>
         <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight tracking-tight text-zinc-900 md:text-6xl">
-          Creators earning from products they actually trust.
+          What a well-scoped creator campaign could look like.
         </h1>
         <p className="mt-4 max-w-3xl text-lg text-zinc-700">
-          These are representative early SignalMatch examples showing how creators turn trusted recommendations into paid outcomes.
+          These are fictional teaching examples, not testimonials, live campaign records, or earnings claims. Real case studies will be labeled with permission and methodology.
         </p>
       </section>
 
@@ -69,7 +69,7 @@ export default function CreatorSuccessStoriesPage() {
       </section>
 
       <section className="mt-8 rounded-3xl border border-zinc-200 bg-white p-6 md:p-8">
-        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">What these creators did right</h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">What the scenarios are designed to teach</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {whatWon.map((item) => (
             <p key={item} className="rounded-2xl bg-zinc-50 px-4 py-3 text-sm text-zinc-700">

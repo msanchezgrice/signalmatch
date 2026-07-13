@@ -23,6 +23,11 @@ export function SiteFooter() {
         </div>
         {!onCreatorAuthFlow ? (
           <div className="flex flex-wrap items-center gap-4 app-muted-text">
+            <Link href="/resources" className="hover:text-[var(--app-text)]">Resources</Link>
+            <Link href="/about" className="hover:text-[var(--app-text)]">About</Link>
+            <Link href="/privacy" className="hover:text-[var(--app-text)]">Privacy</Link>
+            <Link href="/terms" className="hover:text-[var(--app-text)]">Terms</Link>
+            <Link href="/contact" className="hover:text-[var(--app-text)]">Contact</Link>
             {isCreatorFlow ? (
               <>
                 <Link href="/creators" className="hover:text-[var(--app-text)]">

@@ -21,8 +21,10 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://signalmatch.me"),
   title: "SignalMatch",
   description: "CPA marketplace for AI tool builders and AI curators.",
+  alternates: { canonical: "/" },
 };
 
 export default function RootLayout({
