@@ -12,7 +12,7 @@ A CPA campaign needs more than a payout number. Define the event, cap, attributi
 
 ### Remotion explainer
 
-Format: 45–75 seconds, 1080×1080 and 1920×1080. Hook vague deal → campaign spec → funded launch → CTA: build campaign.
+Format: 45–75 seconds, 1080×1080 and 1920×1080. Hook vague deal → campaign plan → funded launch → CTA: build campaign.
 
 End card: article URL, product CTA, and source-note reminder.
 
@@ -30,9 +30,9 @@ Format: 45–75 seconds, 1080×1080 and 1920×1080. Hook random $20 → equation
 
 End card: article URL, product CTA, and source-note reminder.
 
-## Attribution Spec for Creator Campaigns
+## Attribution Plan for Creator Campaigns
 
-Live path: `/resources/attribution-spec-for-creator-campaigns`
+Live path: `/resources/attribution-plan-for-creator-campaigns`
 
 ### Tweet
 
@@ -40,7 +40,7 @@ UTMs alone are not an attribution system. Specify codes, server events, idempote
 
 ### Remotion explainer
 
-Format: 45–75 seconds, 1080×1080 and 1920×1080. Hook duplicate conversion → event flow → clean payout → CTA: download spec.
+Format: 45–75 seconds, 1080×1080 and 1920×1080. Hook duplicate conversion → event flow → clean payout → CTA: download plan.
 
 End card: article URL, product CTA, and source-note reminder.
 
@@ -110,7 +110,7 @@ Prevent duplicate or fake conversions with event integrity, evidence, review, an
 
 ### Remotion explainer
 
-Format: 45–75 seconds, 1080×1080 and 1920×1080. Hook duplicate webhook → controls → fair resolution → CTA: use spec.
+Format: 45–75 seconds, 1080×1080 and 1920×1080. Hook duplicate webhook → controls → fair resolution → CTA: use plan.
 
 End card: article URL, product CTA, and source-note reminder.
 
