@@ -35,8 +35,8 @@ const steps = [
 const whyCards = [
   {
     icon: "🔗",
-    title: "Clean attribution, always",
-    desc: "Referral codes combined with a conversion API make attribution airtight. Every payout has a clear conversion event behind it.",
+    title: "Reviewable attribution",
+    desc: "Referral codes and idempotent conversion events create a shared evidence trail. They reduce duplicate credit but do not make every attribution question disappear.",
   },
   {
     icon: "🛡️",
@@ -50,8 +50,8 @@ const whyCards = [
   },
   {
     icon: "⚡",
-    title: "Launch in < 1 hour",
-    desc: "From account creation to first creator invite, most teams are fully live in under an hour.",
+    title: "Guided campaign setup",
+    desc: "Define the event, CPA, budget, attribution window, approval policy, and creator evidence before sending the first invite.",
   },
 ];
 
@@ -66,7 +66,7 @@ const faqs = [
   },
   {
     q: "How quickly can we launch?",
-    a: "Most teams can set up their account, configure a campaign, and send creator invites in under one hour.",
+    a: "Timing depends on event instrumentation, terms, funding, approval policy, and creator review. Complete those checks before sending an invite.",
   },
   {
     q: "How does attribution work?",
@@ -118,6 +118,9 @@ export default function HomePage() {
           <li>
             <a href="#faq">FAQ</a>
           </li>
+          <li>
+            <Link href="/resources">Resources</Link>
+          </li>
         </ul>
         <div className={styles.navCta}>
           <Link href="/creators" className={`${styles.btn} ${styles.btnGhost}`}>
@@ -168,11 +171,11 @@ export default function HomePage() {
             <div className={styles.avatar}>AL</div>
             <div className={styles.avatar}>PR</div>
           </div>
-          <span>Trusted by 200+ growth teams shipping with creator CPA</span>
+          <span>Public beta: directory and campaign availability changes as verified participants join</span>
         </div>
 
         <div className={styles.exampleSection}>
-          <div className={styles.exampleLabel}>Example campaigns live on SignalMatch</div>
+          <div className={styles.exampleLabel}>Illustrative campaign structures — not live performance claims</div>
           <div className={styles.exampleTable}>
             <div className={styles.exampleTableHead}>
               <span>Product</span>
@@ -220,9 +223,9 @@ export default function HomePage() {
           <div className={`${styles.stepsHeader} ${styles.fadeUp}`} data-fade="up">
             <div className={styles.sectionLabel}>How it works</div>
             <h2 className={styles.sectionTitle}>
-              Launch your first campaign
+              Launch a clearly scoped campaign
               <br />
-              in under an hour
+              with a reviewable conversion event
             </h2>
             <p className={styles.sectionSub}>Four steps from setup to your first verified conversion.</p>
           </div>
@@ -259,24 +262,23 @@ export default function HomePage() {
             <div className={`${styles.whyCard} ${styles.featured} ${styles.fadeUp}`} data-fade="up">
               <div>
                 <div className={styles.whyCardIcon}>🧠</div>
-                <div className={styles.whyCardTitle}>Qualified creator profiles</div>
+                <div className={styles.whyCardTitle}>Creator profiles with explicit evidence fields</div>
                 <p className={styles.whyCardDesc}>
-                  Every creator profile includes verified niches, audience demographic tags, and channel performance data.
-                  You are choosing with confidence.
+                  Profiles can include niches, audience tags, and participant-provided channel evidence. Builders should verify fit before inviting or funding a campaign.
                 </p>
               </div>
               <div className={styles.featuredVisual}>
                 <div className={styles.miniStat}>
-                  <span className={styles.miniStatLabel}>Creator match score</span>
-                  <span className={styles.miniStatValue}>94%</span>
+                  <span className={styles.miniStatLabel}>Example match rubric</span>
+                  <span className={styles.miniStatValue}>Illustrative</span>
                 </div>
                 <div className={styles.miniStat}>
-                  <span className={styles.miniStatLabel}>Avg. conversion quality</span>
-                  <span className={styles.miniStatValue}>High</span>
+                  <span className={styles.miniStatLabel}>Conversion quality</span>
+                  <span className={styles.miniStatValue}>Review required</span>
                 </div>
                 <div className={styles.miniStat}>
                   <span className={styles.miniStatLabel}>Attribution confidence</span>
-                  <span className={styles.miniStatValue}>100%</span>
+                  <span className={styles.miniStatValue}>Evidence-based</span>
                 </div>
               </div>
             </div>
@@ -353,9 +355,10 @@ export default function HomePage() {
           </Link>
           <span>© {new Date().getFullYear()} SignalMatch. Builder-first creator marketplace.</span>
           <div className={styles.footerLinks}>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Contact</a>
+            <Link href="/resources">Resources</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/contact">Contact</Link>
           </div>
         </div>
       </footer>

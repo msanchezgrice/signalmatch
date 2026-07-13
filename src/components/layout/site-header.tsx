@@ -23,6 +23,9 @@ export function SiteHeader() {
           </Link>
           {!onCreatorAuthFlow ? (
             <nav className="hidden items-center gap-5 text-sm app-muted-text md:flex">
+              <Link href="/resources" className="hover:text-[var(--app-text)]">
+                Resources
+              </Link>
               {isCreatorFlow ? (
                 <>
                   <Link href="/creators/success-stories" className="hover:text-[var(--app-text)]">

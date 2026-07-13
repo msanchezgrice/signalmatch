@@ -360,9 +360,9 @@ export default function CreatorsPage() {
         <div className={styles.container}>
           <div className={styles.fadeUp} data-fade="up" style={{ textAlign: "center" }}>
             <div className={styles.sectionLabel}>Earnings calculator</div>
-            <h2 className={styles.sectionTitle}>See what you could earn</h2>
+            <h2 className={styles.sectionTitle}>Model a campaign scenario</h2>
             <p className={styles.sectionSub} style={{ margin: "0 auto" }}>
-              Adjust monthly reach, conversion rate, and average CPA.
+              Adjust monthly reach, assumed conversion rate, and CPA. This is arithmetic, not an earnings promise.
             </p>
           </div>
 
@@ -406,7 +406,7 @@ export default function CreatorsPage() {
             </div>
             <div className={styles.calcResult}>
               <div>
-                <div className={styles.calcResultLabel}>Estimated monthly earnings</div>
+                <div className={styles.calcResultLabel}>Illustrative gross payout</div>
                 <div className={styles.calcResultSub}>Based on {conversions.toLocaleString()} conversions/mo</div>
               </div>
               <div className={styles.calcResultValue}>${earnings.toLocaleString()}</div>
@@ -441,7 +441,7 @@ export default function CreatorsPage() {
             <br />
             what you already do?
           </h2>
-          <p className={styles.finalCtaSub}>Join creators earning CPA payouts by sharing products their audiences love.</p>
+          <p className={styles.finalCtaSub}>Join the public beta, review the campaign terms, and promote only products that genuinely fit your audience.</p>
           <div className={styles.finalCtaActions}>
             <button className={`${styles.btn} ${styles.btnCreator} ${styles.btnLg}`} onClick={handleJoin}>
               Create your creator account
@@ -453,7 +453,7 @@ export default function CreatorsPage() {
           <div className={styles.finalCtaTrust}>
             <span>Free to join</span>
             <span>No followers minimum</span>
-            <span>Payouts within 24h</span>
+            <span>Payout timing shown in campaign terms</span>
             <span>No commission cuts</span>
           </div>
         </div>
@@ -467,9 +467,10 @@ export default function CreatorsPage() {
           </Link>
           <span>© {new Date().getFullYear()} SignalMatch. Builder-first creator marketplace.</span>
           <div className={styles.footerLinks}>
-            <a href="#">Privacy</a>
-            <a href="#">Terms</a>
-            <a href="#">Contact</a>
+            <Link href="/resources">Resources</Link>
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+            <Link href="/contact">Contact</Link>
           </div>
         </div>
       </footer>
