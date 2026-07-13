@@ -25,6 +25,8 @@ export const metadata: Metadata = {
   title: "SignalMatch",
   description: "CPA marketplace for AI tool builders and AI curators.",
   alternates: { canonical: "/" },
+  openGraph: { title: "SignalMatch", description: "CPA marketplace for AI tool builders and AI curators.", url: "/", images: ["/opengraph-image"] },
+  twitter: { card: "summary_large_image", images: ["/opengraph-image"] },
 };
 
 export default function RootLayout({
