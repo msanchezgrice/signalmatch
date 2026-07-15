@@ -123,7 +123,16 @@ export async function getCreatorDirectory(filters: DirectoryFilters) {
 
 export async function getCreatorById(id: string) {
   const { rows } = await sql(
-    `select cp.*, u.role
+    `select
+       cp.id,
+       cp.display_name,
+       cp.bio,
+       cp.avatar_url,
+       cp.niches,
+       cp.audience_tags,
+       cp.channels,
+       cp.verification_status,
+       u.role
      from creator_profiles cp
      join users u on u.id = cp.user_id
      where cp.id = $1
@@ -189,6 +198,29 @@ export async function getCampaignById(campaignId: string) {
      from campaigns c
      join products p on p.id = c.product_id
      where c.id = $1
+     limit 1`,
+    [campaignId],
+  );
+
+  return rows[0] ?? null;
+}
+
+export async function getPublicCampaignById(campaignId: string) {
+  const { rows } = await sql(
+    `select
+       c.id,
+       c.title,
+       c.brief,
+       c.target_tags,
+       c.conversion_type,
+       c.cpa_amount_cents,
+       c.status,
+       p.name as product_name,
+       p.url as product_url
+     from campaigns c
+     join products p on p.id = c.product_id
+     where c.id = $1
+       and c.status = 'active'
      limit 1`,
     [campaignId],
   );

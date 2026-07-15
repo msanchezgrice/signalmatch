@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hashToken } from "@/server/crypto";
 import {
   createConversionWithBudgetCheck,
+  findConversionAndPayoutByDedup,
   findPartnershipByRefCode,
   findProductByApiKeyHash,
 } from "@/server/db/write";
@@ -59,21 +60,43 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await createConversionWithBudgetCheck({
-      partnershipId: partnership.id,
-      creatorUserId: partnership.creator_user_id,
-      campaignId: partnership.campaign_id,
-      eventType: parsed.data.event_type,
-      externalUserId: parsed.data.external_user_id
-        ? sha256(parsed.data.external_user_id)
-        : undefined,
-      idempotencyKey: parsed.data.idempotency_key,
-      payoutAmountCents: partnership.cpa_amount_cents,
-      approvalMode: partnership.approval_mode,
-    });
+    const externalUserId = parsed.data.external_user_id
+      ? sha256(parsed.data.external_user_id)
+      : undefined;
+    let deduped = false;
+    let result: Awaited<ReturnType<typeof createConversionWithBudgetCheck>>;
+
+    try {
+      result = await createConversionWithBudgetCheck({
+        partnershipId: partnership.id,
+        creatorUserId: partnership.creator_user_id,
+        campaignId: partnership.campaign_id,
+        eventType: parsed.data.event_type,
+        externalUserId,
+        idempotencyKey: parsed.data.idempotency_key,
+        payoutAmountCents: partnership.cpa_amount_cents,
+        approvalMode: partnership.approval_mode,
+      });
+    } catch (error: unknown) {
+      if (!(typeof error === "object" && error && "code" in error && error.code === "23505")) {
+        throw error;
+      }
+
+      const existing = await findConversionAndPayoutByDedup({
+        partnershipId: partnership.id,
+        eventType: parsed.data.event_type,
+        externalUserId,
+        idempotencyKey: parsed.data.idempotency_key,
+      });
+      if (!existing) {
+        throw error;
+      }
+      result = existing;
+      deduped = true;
+    }
 
     let payoutStatus: string | undefined;
-    if (result.payout) {
+    if (result.payout && result.payout.status !== "paid") {
       const payoutResult = await settlePayoutIfPossible({
         payoutId: result.payout.id,
         creatorUserId: result.payout.creator_user_id,
@@ -85,23 +108,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
+      deduped,
       conversion_id: result.conversion.id,
       status: result.conversion.status,
       payout_amount_cents: result.conversion.payout_amount_cents,
       payout_status: payoutStatus,
     });
   } catch (error: unknown) {
-    if (typeof error === "object" && error && "code" in error && error.code === "23505") {
-      return NextResponse.json(
-        {
-          ok: true,
-          deduped: true,
-          message: "Conversion already received for this key",
-        },
-        { status: 200 },
-      );
-    }
-
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "Unexpected error" },
       { status: 500 },

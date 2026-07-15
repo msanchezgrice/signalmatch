@@ -7,23 +7,34 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAnalytics } from "@/components/providers/analytics-provider";
 
 const platforms = [
-  { id: "linkedin", label: "LinkedIn", example: "linkedin.com/in/your-profile or @yourname" },
-  { id: "x", label: "X (Formerly Twitter)", example: "x.com/yourhandle or @yourhandle" },
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    example: "linkedin.com/in/your-profile or @yourname",
+  },
+  {
+    id: "x",
+    label: "X (Formerly Twitter)",
+    example: "x.com/yourhandle or @yourhandle",
+  },
 ] as const;
 
 type Platform = (typeof platforms)[number]["id"];
 
 export function CreatorPersonaDiscovery() {
   const router = useRouter();
+  const { capture } = useAnalytics();
   const [platform, setPlatform] = useState<Platform>("linkedin");
   const [profileUrl, setProfileUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusText, setStatusText] = useState<string | null>(null);
 
   const placeholder = useMemo(
-    () => platforms.find((item) => item.id === platform)?.example ?? "@yourname",
+    () =>
+      platforms.find((item) => item.id === platform)?.example ?? "@yourname",
     [platform],
   );
 
@@ -38,6 +49,7 @@ export function CreatorPersonaDiscovery() {
 
     setIsSubmitting(true);
     setStatusText("Reading your profile...");
+    capture("tool_started", { tool: "creator-profile-analyzer" });
 
     try {
       const res = await fetch("/api/public/creator-profile-analyzer", {
@@ -52,9 +64,15 @@ export function CreatorPersonaDiscovery() {
         throw new Error(json?.error || "Could not analyze profile");
       }
 
+      capture("tool_completed", {
+        tool: "creator-profile-analyzer",
+        result: "profile-prefill-created",
+      });
       router.push("/creators/sign-up");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not analyze profile");
+      toast.error(
+        error instanceof Error ? error.message : "Could not analyze profile",
+      );
       setStatusText(null);
       setIsSubmitting(false);
     }
@@ -66,7 +84,8 @@ export function CreatorPersonaDiscovery() {
         Find your niche, get started
       </h2>
       <p className="mt-3 max-w-3xl text-zinc-600">
-        Drop your LinkedIn or X profile and we will tailor campaign ideas you can genuinely promote.
+        Drop your LinkedIn or X profile and we will tailor campaign ideas you
+        can genuinely promote.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -120,10 +139,13 @@ export function CreatorPersonaDiscovery() {
           </Button>
         </div>
 
-        {statusText ? <p className="text-sm text-zinc-600">{statusText}</p> : null}
+        {statusText ? (
+          <p className="text-sm text-zinc-600">{statusText}</p>
+        ) : null}
 
         <p className="text-sm text-zinc-500">
-          Tip: paste a profile URL, <code>www...</code> link, or just a handle like <code>@yourname</code>.
+          Tip: paste a profile URL, <code>www...</code> link, or just a handle
+          like <code>@yourname</code>.
         </p>
       </form>
     </section>

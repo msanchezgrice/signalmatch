@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import { UserButton } from "@clerk/nextjs";
@@ -49,9 +50,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-8">
           <div className="flex items-center gap-5 text-sm">
             <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight app-strong-text">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-primary text-[10px] font-bold text-primary-foreground">
-                SM
-              </span>
+              <Image src="/brand/signalmatch-mark.png" alt="" width={24} height={24} />
               <span>SignalMatch</span>
             </Link>
             <span className="rounded-full border px-2 py-0.5 text-xs app-subtle-text">

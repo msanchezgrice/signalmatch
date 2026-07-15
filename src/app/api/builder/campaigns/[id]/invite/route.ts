@@ -23,13 +23,19 @@ export async function POST(
       `select c.id
        from campaigns c
        join products p on p.id = c.product_id
-       where c.id = $1 and p.owner_user_id = $2
+       where c.id = $1
+         and p.owner_user_id = $2
+         and c.status = 'active'
+         and c.budget_available_cents >= c.cpa_amount_cents
        limit 1`,
       [id, authContext.userId],
     );
 
     if (!ownership.rows[0]) {
-      return NextResponse.json({ ok: false, error: "Campaign not found" }, { status: 404 });
+      return NextResponse.json(
+        { ok: false, error: "Fund and activate the campaign before inviting creators" },
+        { status: 409 },
+      );
     }
 
     const partnership = await inviteCreatorToCampaign({

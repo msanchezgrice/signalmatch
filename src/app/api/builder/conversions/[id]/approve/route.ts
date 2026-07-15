@@ -17,7 +17,7 @@ export async function POST(
       return NextResponse.json({ ok: false, error: "Conversion not found" }, { status: 404 });
     }
 
-    if (!result.approved || !result.payout) {
+    if (!result.approved || !result.payout || result.payout.status === "paid") {
       return NextResponse.json({ ok: true, ...result });
     }
 

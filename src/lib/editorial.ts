@@ -20,4 +20,5 @@ export type EditorialPost = {
 };
 
 export const editorialPosts = rawPosts as EditorialPost[];
-export const getEditorialPost = (slug: string) => editorialPosts.find((post) => post.slug === slug);
+export const getEditorialPost = (slug: string) =>
+  editorialPosts.find((post) => post.slug === slug);

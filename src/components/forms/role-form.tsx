@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { useAnalytics } from "@/components/providers/analytics-provider";
 import {
   Tooltip,
   TooltipContent,
@@ -64,6 +65,7 @@ export function RoleForm({
   hasCreatorPrefill?: boolean;
 }) {
   const router = useRouter();
+  const { capture } = useAnalytics();
   const [loading, setLoading] = useState(false);
   const [selectedRole, setSelectedRole] = useState<Role | null>(
     (currentRole as Role | null) ?? preferredRole ?? null,
@@ -88,13 +90,16 @@ export function RoleForm({
           ? `/app/creator/onboarding?prefill=${encodeURIComponent(creatorPrefillQueryToken)}`
           : role === "CREATOR" && hasCreatorPrefill
             ? "/app/creator/onboarding"
-          : roleMeta[role].destination;
+            : roleMeta[role].destination;
 
       toast.success("Workspace configured");
+      capture("role_selected", { role });
       router.push(destination);
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save role");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save role",
+      );
     } finally {
       setLoading(false);
     }
@@ -102,7 +107,7 @@ export function RoleForm({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center gap-2 text-xs app-subtle-text">
+      <div className="app-subtle-text flex items-center gap-2 text-xs">
         <Compass className="h-4 w-4" />
         <span>Step 1 of 2: Choose workspace</span>
       </div>
@@ -120,36 +125,48 @@ export function RoleForm({
             }`}
             disabled={loading}
           >
-            <p className="text-sm font-medium uppercase tracking-wide app-subtle-text">
+            <p className="app-subtle-text text-sm font-medium tracking-wide uppercase">
               {role === "BUILDER" ? "Builder" : "Creator"}
             </p>
-            <h3 className="mt-2 text-lg font-semibold">{roleMeta[role].title}</h3>
-            <p className="mt-2 text-sm app-muted-text">{roleMeta[role].subtitle}</p>
+            <h3 className="mt-2 text-lg font-semibold">
+              {roleMeta[role].title}
+            </h3>
+            <p className="app-muted-text mt-2 text-sm">
+              {roleMeta[role].subtitle}
+            </p>
           </button>
         ))}
       </div>
 
       {selectedRole ? (
-        <div className="rounded-2xl border app-surface p-5">
+        <div className="app-surface rounded-2xl border p-5">
           <div className="mb-3 flex items-center justify-between">
-            <p className="text-sm font-semibold app-strong-text">
-              Step 2 of 2: Confirm {selectedRole === "BUILDER" ? "builder" : "creator"} workspace
+            <p className="app-strong-text text-sm font-semibold">
+              Step 2 of 2: Confirm{" "}
+              {selectedRole === "BUILDER" ? "builder" : "creator"} workspace
             </p>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button type="button" className="rounded p-1 app-subtle-text hover:text-[var(--app-text)]">
+                <button
+                  type="button"
+                  className="app-subtle-text rounded p-1 hover:text-[var(--app-text)]"
+                >
                   <Info className="h-4 w-4" />
                 </button>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                Each account uses a single workspace path to keep navigation and actions focused.
+                Each account uses a single workspace path to keep navigation and
+                actions focused.
               </TooltipContent>
             </Tooltip>
           </div>
           <div className="space-y-2">
             {roleMeta[selectedRole].checklist.map((item) => (
-              <div key={item} className="flex items-start gap-2 text-sm app-muted-text">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
+              <div
+                key={item}
+                className="app-muted-text flex items-start gap-2 text-sm"
+              >
+                <CheckCircle2 className="text-primary mt-0.5 h-4 w-4" />
                 <span>{item}</span>
               </div>
             ))}
@@ -164,9 +181,10 @@ export function RoleForm({
               Continue to workspace
               <ArrowRight className="h-4 w-4" />
             </Button>
-            <p className="flex items-center gap-2 text-xs app-subtle-text">
+            <p className="app-subtle-text flex items-center gap-2 text-xs">
               <Sparkles className="h-3.5 w-3.5" />
-              You can create another account if you want to operate the other side.
+              You can create another account if you want to operate the other
+              side.
             </p>
           </div>
         </div>

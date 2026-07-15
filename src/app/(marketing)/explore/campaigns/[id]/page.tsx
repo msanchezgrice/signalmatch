@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { getCampaignById } from "@/server/db/read";
+import { getPublicCampaignById } from "@/server/db/read";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -16,7 +16,7 @@ function conversionLabel(type: string) {
 
 export default async function CampaignDetailPage({ params }: Props) {
   const { id } = await params;
-  const campaign = await getCampaignById(id);
+  const campaign = await getPublicCampaignById(id);
 
   if (!campaign) {
     notFound();

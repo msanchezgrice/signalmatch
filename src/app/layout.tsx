@@ -4,7 +4,8 @@ import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import { PostHogProvider } from "@/components/providers/posthog-provider";
+import { AnalyticsProvider } from "@/components/providers/analytics-provider";
+import { getMarketingMetadata } from "@/lib/marketing-metadata";
 import { env } from "@/server/env";
 
 import "./globals.css";
@@ -21,12 +22,12 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://signalmatch.me"),
-  title: "SignalMatch",
-  description: "CPA marketplace for AI tool builders and AI curators.",
-  alternates: { canonical: "/" },
-  openGraph: { title: "SignalMatch", description: "CPA marketplace for AI tool builders and AI curators.", url: "/", images: ["/opengraph-image"] },
-  twitter: { card: "summary_large_image", images: ["/opengraph-image"] },
+  metadataBase: new URL("https://www.signalmatch.me"),
+  applicationName: "SignalMatch",
+  category: "business",
+  creator: "SignalMatch",
+  publisher: "SignalMatch",
+  ...getMarketingMetadata("/"),
 };
 
 export default function RootLayout({
@@ -38,14 +39,24 @@ export default function RootLayout({
     <ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <html lang="en">
         <body
-          className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} bg-background font-sans text-foreground antialiased`}
+          className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} bg-background text-foreground font-sans antialiased`}
         >
-          <PostHogProvider apiKey={env.POSTHOG_API_KEY}>
+          <AnalyticsProvider
+            config={{
+              posthogApiKey: env.NEXT_PUBLIC_POSTHOG_KEY ?? env.POSTHOG_API_KEY,
+              posthogHost: env.NEXT_PUBLIC_POSTHOG_HOST ?? env.POSTHOG_HOST,
+              gtmId: env.NEXT_PUBLIC_GTM_ID,
+              gaMeasurementId: env.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+              googleAdsId: env.NEXT_PUBLIC_GOOGLE_ADS_ID,
+              googleAdsSignupLabel: env.NEXT_PUBLIC_GOOGLE_ADS_SIGNUP_LABEL,
+              metaPixelId: env.NEXT_PUBLIC_META_PIXEL_ID,
+            }}
+          >
             <TooltipProvider>
               {children}
               <Toaster richColors />
             </TooltipProvider>
-          </PostHogProvider>
+          </AnalyticsProvider>
         </body>
       </html>
     </ClerkProvider>

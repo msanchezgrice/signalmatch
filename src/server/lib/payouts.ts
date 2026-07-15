@@ -14,16 +14,19 @@ export async function settlePayoutIfPossible(input: {
     return { settled: false, reason: "missing_stripe_account" as const };
   }
 
-  const transfer = await stripe.transfers.create({
-    amount: input.amountCents,
-    currency: "usd",
-    destination: stripeAccountId,
-    metadata: {
-      payout_id: input.payoutId,
-      campaign_id: input.campaignId,
-      creator_user_id: input.creatorUserId,
+  const transfer = await stripe.transfers.create(
+    {
+      amount: input.amountCents,
+      currency: "usd",
+      destination: stripeAccountId,
+      metadata: {
+        payout_id: input.payoutId,
+        campaign_id: input.campaignId,
+        creator_user_id: input.creatorUserId,
+      },
     },
-  });
+    { idempotencyKey: input.payoutId },
+  );
 
   await markPayoutPaid(input.payoutId, transfer.id);
 
