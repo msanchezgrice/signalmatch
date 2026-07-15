@@ -4,6 +4,7 @@ import {
   getGoogleAdsDestination,
   getMetaPixelEvent,
 } from "../../src/lib/analytics/events";
+import { createDispatchQueue } from "../../src/lib/analytics/dispatch-queue";
 import {
   getAuthTrackingPermissions,
   hasAnalyticsConsent,
@@ -41,6 +42,44 @@ describe("analytics event destinations", () => {
     expect(getMetaPixelEvent("checkout_started")).toBe("InitiateCheckout");
     expect(getMetaPixelEvent("campaign_created")).toBe("Lead");
     expect(getMetaPixelEvent("page_view")).toBeNull();
+  });
+});
+
+describe("analytics provider readiness", () => {
+  it("queues an event until its provider is ready, then flushes it once", () => {
+    const queue = createDispatchQueue<string>();
+    const delivered: string[] = [];
+    let ready = false;
+    const dispatch = (event: string) => {
+      if (!ready) {
+        return false;
+      }
+      delivered.push(event);
+      return true;
+    };
+
+    expect(queue.dispatchOrQueue("page_view", dispatch)).toBe(false);
+    expect(queue.size()).toBe(1);
+    expect(delivered).toEqual([]);
+
+    ready = true;
+    queue.flush(dispatch);
+    queue.flush(dispatch);
+
+    expect(queue.size()).toBe(0);
+    expect(delivered).toEqual(["page_view"]);
+  });
+
+  it("keeps undeliverable events queued and can clear them on consent revoke", () => {
+    const queue = createDispatchQueue<string>();
+    const unavailable = () => false;
+
+    queue.dispatchOrQueue("sign_up_completed", unavailable);
+    queue.flush(unavailable);
+
+    expect(queue.size()).toBe(1);
+    queue.clear();
+    expect(queue.size()).toBe(0);
   });
 });
 

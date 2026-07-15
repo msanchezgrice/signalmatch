@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500" role="img" aria-labelledby="title desc">
+  <title id="title">SignalMatch social cover</title>
+  <desc id="desc">SignalMatch brand mark with the message Build creator partnerships that convert.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="0.55" stop-color="#172554"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.75" cy="0.18" r="0.8">
+      <stop offset="0" stop-color="#15e5f2" stop-opacity="0.25"/>
+      <stop offset="1" stop-color="#15e5f2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="iris" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7057ff"/>
+      <stop offset="1" stop-color="#a42cff"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15e5f2"/>
+      <stop offset="1" stop-color="#00add8"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff745f"/>
+      <stop offset="1" stop-color="#ff405f"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#020617" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="1500" height="500" rx="28" fill="url(#background)"/>
+  <rect width="1500" height="500" rx="28" fill="url(#glow)"/>
+  <g opacity="0.18" fill="none" stroke="#ffffff">
+    <circle cx="1320" cy="85" r="230"/>
+    <circle cx="1320" cy="85" r="310"/>
+    <circle cx="1320" cy="85" r="390"/>
+  </g>
+  <g transform="translate(145 70) scale(.35)" filter="url(#shadow)">
+    <circle cx="512" cy="512" r="420" fill="#ffffff" fill-opacity="0.08"/>
+    <path d="M 512 237 A 275 275 0 1 0 386.5 756.8" fill="none" stroke="url(#iris)" stroke-width="184" stroke-linecap="butt"/>
+    <path d="M 640 268.6 A 275 275 0 0 1 512 787" fill="none" stroke="url(#cyan)" stroke-width="184" stroke-linecap="butt"/>
+    <circle cx="512" cy="512" r="84" fill="url(#coral)"/>
+  </g>
+  <g fill="#ffffff" font-family="Arial, Helvetica, sans-serif">
+    <text x="560" y="205" font-size="76" font-weight="700" letter-spacing="-2">SignalMatch</text>
+    <text x="560" y="285" font-size="36" font-weight="500" fill="#dbeafe">Build creator partnerships that convert.</text>
+    <text x="560" y="350" font-size="24" font-weight="600" fill="#99f6e4" letter-spacing="1.2">SIGNALMATCH.ME</text>
+  </g>
+</svg>

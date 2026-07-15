@@ -24,6 +24,7 @@ import {
   serializeConsentPreferences,
   type ConsentPreferences,
 } from "@/lib/analytics/consent";
+import { createDispatchQueue } from "@/lib/analytics/dispatch-queue";
 import {
   getGoogleAdsDestination,
   getMetaPixelEvent,
@@ -62,7 +63,23 @@ type AnalyticsContextValue = {
 
 const AnalyticsContext = createContext<AnalyticsContextValue | null>(null);
 const CONSENT_CHANGE_EVENT = "signalmatch-consent-change";
+const GOOGLE_TAG_READY_EVENT = "signalmatch-google-tag-ready";
+const META_PIXEL_READY_EVENT = "signalmatch-meta-pixel-ready";
 const subscribeHydration = () => () => undefined;
+
+type QueuedAnalyticsEvent = {
+  event: AnalyticsEventName;
+  properties: AnalyticsEventMap[AnalyticsEventName];
+};
+
+type QueuedGoogleAdsConversion = {
+  destination: string;
+};
+
+type QueuedMetaEvent = {
+  event: string;
+  properties: AnalyticsEventMap[AnalyticsEventName];
+};
 
 function subscribeConsent(onStoreChange: () => void) {
   window.addEventListener("storage", onStoreChange);
@@ -93,6 +110,16 @@ export function AnalyticsProvider({
   config: AnalyticsConfig;
 }) {
   const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const [posthogQueue] = useState(() =>
+    createDispatchQueue<QueuedAnalyticsEvent>(),
+  );
+  const [googleAnalyticsQueue] = useState(() =>
+    createDispatchQueue<QueuedAnalyticsEvent>(),
+  );
+  const [googleAdsQueue] = useState(() =>
+    createDispatchQueue<QueuedGoogleAdsConversion>(),
+  );
+  const [metaQueue] = useState(() => createDispatchQueue<QueuedMetaEvent>());
   const consentSnapshot = useSyncExternalStore(
     subscribeConsent,
     getConsentSnapshot,
@@ -108,12 +135,49 @@ export function AnalyticsProvider({
     () => false,
   );
 
+  const dispatchPostHog = useCallback((item: QueuedAnalyticsEvent) => {
+    if (!posthog.__loaded || posthog.has_opted_out_capturing()) {
+      return false;
+    }
+    posthog.capture(
+      item.event === "page_view" ? "$pageview" : item.event,
+      item.properties,
+    );
+    return true;
+  }, []);
+
+  const dispatchGoogleAnalytics = useCallback((item: QueuedAnalyticsEvent) => {
+    if (!window.gtag) {
+      return false;
+    }
+    window.gtag("event", item.event, item.properties);
+    return true;
+  }, []);
+
+  const dispatchGoogleAds = useCallback((item: QueuedGoogleAdsConversion) => {
+    if (!window.gtag) {
+      return false;
+    }
+    window.gtag("event", "conversion", { send_to: item.destination });
+    return true;
+  }, []);
+
+  const dispatchMeta = useCallback((item: QueuedMetaEvent) => {
+    if (!window.fbq) {
+      return false;
+    }
+    window.fbq("track", item.event, item.properties);
+    return true;
+  }, []);
+
   useEffect(() => {
     if (!hydrated) {
       return;
     }
 
     if (!consent?.analytics) {
+      posthogQueue.clear();
+      googleAnalyticsQueue.clear();
       if (posthog.__loaded) {
         posthog.opt_out_capturing();
         posthog.reset();
@@ -137,7 +201,54 @@ export function AnalyticsProvider({
     }
 
     posthog.opt_in_capturing();
-  }, [config.posthogApiKey, config.posthogHost, consent, hydrated]);
+    posthogQueue.flush(dispatchPostHog);
+  }, [
+    config.posthogApiKey,
+    config.posthogHost,
+    consent,
+    dispatchPostHog,
+    googleAnalyticsQueue,
+    hydrated,
+    posthogQueue,
+  ]);
+
+  useEffect(() => {
+    const flushGoogleQueues = () => {
+      googleAnalyticsQueue.flush(dispatchGoogleAnalytics);
+      googleAdsQueue.flush(dispatchGoogleAds);
+    };
+    window.addEventListener(GOOGLE_TAG_READY_EVENT, flushGoogleQueues);
+    if (window.gtag) {
+      flushGoogleQueues();
+    }
+    return () =>
+      window.removeEventListener(GOOGLE_TAG_READY_EVENT, flushGoogleQueues);
+  }, [
+    dispatchGoogleAds,
+    dispatchGoogleAnalytics,
+    googleAdsQueue,
+    googleAnalyticsQueue,
+  ]);
+
+  useEffect(() => {
+    const flushMetaQueue = () => metaQueue.flush(dispatchMeta);
+    window.addEventListener(META_PIXEL_READY_EVENT, flushMetaQueue);
+    if (window.fbq) {
+      flushMetaQueue();
+    }
+    return () =>
+      window.removeEventListener(META_PIXEL_READY_EVENT, flushMetaQueue);
+  }, [dispatchMeta, metaQueue]);
+
+  useEffect(() => {
+    if (!consent?.analytics) {
+      googleAnalyticsQueue.clear();
+    }
+    if (!consent?.marketing) {
+      googleAdsQueue.clear();
+      metaQueue.clear();
+    }
+  }, [consent, googleAdsQueue, googleAnalyticsQueue, metaQueue]);
 
   useEffect(() => {
     if (!hydrated || consent) {
@@ -179,21 +290,20 @@ export function AnalyticsProvider({
       properties: AnalyticsEventMap[Event],
     ) => {
       if (consent?.analytics) {
-        if (posthog.__loaded && !posthog.has_opted_out_capturing()) {
-          posthog.capture(
-            event === "page_view" ? "$pageview" : event,
-            properties,
+        const queuedEvent: QueuedAnalyticsEvent = { event, properties };
+        if (config.posthogApiKey) {
+          posthogQueue.dispatchOrQueue(queuedEvent, dispatchPostHog);
+        }
+        if (config.gaMeasurementId) {
+          googleAnalyticsQueue.dispatchOrQueue(
+            queuedEvent,
+            dispatchGoogleAnalytics,
           );
         }
-        window.gtag?.("event", event, properties);
       }
 
       if (!consent?.marketing) {
         return;
-      }
-
-      if (event === "page_view") {
-        window.fbq?.("track", "PageView");
       }
 
       const adsDestination = getGoogleAdsDestination(event, {
@@ -201,15 +311,37 @@ export function AnalyticsProvider({
         signupLabel: config.googleAdsSignupLabel,
       });
       if (adsDestination) {
-        window.gtag?.("event", "conversion", { send_to: adsDestination });
+        googleAdsQueue.dispatchOrQueue(
+          { destination: adsDestination },
+          dispatchGoogleAds,
+        );
       }
 
-      const metaEvent = getMetaPixelEvent(event);
-      if (metaEvent) {
-        window.fbq?.("track", metaEvent, properties);
+      const metaEvent =
+        event === "page_view" ? "PageView" : getMetaPixelEvent(event);
+      if (metaEvent && config.metaPixelId) {
+        metaQueue.dispatchOrQueue(
+          { event: metaEvent, properties },
+          dispatchMeta,
+        );
       }
     },
-    [config.googleAdsId, config.googleAdsSignupLabel, consent],
+    [
+      config.gaMeasurementId,
+      config.googleAdsId,
+      config.googleAdsSignupLabel,
+      config.metaPixelId,
+      config.posthogApiKey,
+      consent,
+      dispatchGoogleAds,
+      dispatchGoogleAnalytics,
+      dispatchMeta,
+      dispatchPostHog,
+      googleAdsQueue,
+      googleAnalyticsQueue,
+      metaQueue,
+      posthogQueue,
+    ],
   );
 
   const value = useMemo<AnalyticsContextValue>(
@@ -390,7 +522,8 @@ gtag('consent', 'update', {
   ad_user_data: '${consent.marketing ? "granted" : "denied"}',
   ad_personalization: '${consent.marketing ? "granted" : "denied"}'
 });
-${configurations}`}
+${configurations}
+window.dispatchEvent(new Event('${GOOGLE_TAG_READY_EVENT}'));`}
       </Script>
     </>
   );
@@ -431,7 +564,8 @@ n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
 n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
 (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
-fbq('consent', 'grant');fbq('init', '${id}');`}
+fbq('consent', 'grant');fbq('init', '${id}');
+window.dispatchEvent(new Event('${META_PIXEL_READY_EVENT}'));`}
     </Script>
   );
 }
