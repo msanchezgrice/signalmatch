@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ type ActionButtonProps = {
   action: string;
   payload?: Record<string, unknown>;
   variant?: "default" | "outline" | "destructive";
+  useIdempotencyKey?: boolean;
 };
 
 export function ActionButton({
@@ -19,10 +20,12 @@ export function ActionButton({
   action,
   payload,
   variant = "default",
+  useIdempotencyKey = false,
 }: ActionButtonProps) {
   const router = useRouter();
   const { capture } = useAnalytics();
   const [loading, setLoading] = useState(false);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   return (
     <Button
@@ -32,10 +35,19 @@ export function ActionButton({
       onClick={async () => {
         setLoading(true);
         try {
+          if (useIdempotencyKey && !idempotencyKeyRef.current) {
+            idempotencyKeyRef.current = crypto.randomUUID();
+          }
+
           const res = await fetch(action, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload ?? {}),
+            body: JSON.stringify({
+              ...(payload ?? {}),
+              ...(idempotencyKeyRef.current
+                ? { idempotency_key: idempotencyKeyRef.current }
+                : {}),
+            }),
           });
           const json = await res.json();
           if (!res.ok) {

@@ -44,13 +44,17 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
         <CardHeader>
           <CardTitle className="text-2xl">{campaign.title}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-sm app-muted-text">
+        <CardContent className="app-muted-text space-y-2 text-sm">
           <p>{campaign.brief || "No brief"}</p>
-          <p>Budget available: ${(campaign.budget_available_cents / 100).toFixed(2)}</p>
+          <p>
+            Budget available: $
+            {(campaign.budget_available_cents / 100).toFixed(2)}
+          </p>
           <ActionButton
             label="Add budget ($100)"
             action={`/api/builder/campaigns/${id}/fund`}
             payload={{ amount_cents: 10000 }}
+            useIdempotencyKey
           />
         </CardContent>
       </Card>
@@ -60,19 +64,25 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
           <CardHeader>
             <CardTitle className="text-base">Clicks</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold">{analytics?.clicks ?? 0}</CardContent>
+          <CardContent className="text-2xl font-semibold">
+            {analytics?.clicks ?? 0}
+          </CardContent>
         </Card>
         <Card className="app-surface">
           <CardHeader>
             <CardTitle className="text-base">Approved</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold">{analytics?.approved_conversions ?? 0}</CardContent>
+          <CardContent className="text-2xl font-semibold">
+            {analytics?.approved_conversions ?? 0}
+          </CardContent>
         </Card>
         <Card className="app-surface">
           <CardHeader>
             <CardTitle className="text-base">Pending</CardTitle>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold">{analytics?.pending_conversions ?? 0}</CardContent>
+          <CardContent className="text-2xl font-semibold">
+            {analytics?.pending_conversions ?? 0}
+          </CardContent>
         </Card>
         <Card className="app-surface">
           <CardHeader>
@@ -90,9 +100,14 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           {creators.creators.map((creator) => (
-            <div key={creator.creator_profile_id} className="rounded-lg border app-surface p-3">
+            <div
+              key={creator.creator_profile_id}
+              className="app-surface rounded-lg border p-3"
+            >
               <p className="font-medium">{creator.display_name}</p>
-              <p className="mb-2 text-xs app-subtle-text">{creator.niches.join(", ") || "n/a"}</p>
+              <p className="app-subtle-text mb-2 text-xs">
+                {creator.niches.join(", ") || "n/a"}
+              </p>
               <ActionButton
                 label="Invite"
                 action={`/api/builder/campaigns/${id}/invite`}
@@ -116,7 +131,10 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           {partnerships.map((partnership: any) => (
-            <div key={partnership.id} className="flex items-center justify-between rounded-lg border p-2">
+            <div
+              key={partnership.id}
+              className="flex items-center justify-between rounded-lg border p-2"
+            >
               <span>
                 {partnership.display_name || "Creator"} · {partnership.status}
               </span>
@@ -132,9 +150,13 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           {conversions.map((conversion: any) => (
-            <div key={conversion.id} className="flex items-center justify-between rounded-lg border p-2">
+            <div
+              key={conversion.id}
+              className="flex items-center justify-between rounded-lg border p-2"
+            >
               <span>
-                {conversion.event_type} · {conversion.status} · {conversion.ref_code}
+                {conversion.event_type} · {conversion.status} ·{" "}
+                {conversion.ref_code}
               </span>
               {conversion.status === "pending" ? (
                 <ActionButton

@@ -13,7 +13,9 @@ describe("payment safety contracts", () => {
 
     expect(route).toContain("recordSuccessfulFunding");
     expect(route).not.toContain("applyFundingToCampaign");
-    expect(writes).toContain("on conflict (stripe_checkout_session_id) do nothing");
+    expect(writes).toContain(
+      "on conflict (stripe_checkout_session_id) do nothing",
+    );
     expect(writes).toContain("returning id");
     expect(writes).toContain("withTransaction");
   });
@@ -31,9 +33,13 @@ describe("payment safety contracts", () => {
     expect(route).toContain('session.payment_status !== "paid"');
     expect(route).toContain('session.currency !== "usd"');
     expect(route).toContain("amount <= 0");
-    expect(route).toContain('event.type === "checkout.session.async_payment_succeeded"');
+    expect(route).toContain(
+      'event.type === "checkout.session.async_payment_succeeded"',
+    );
     expect(route).toContain("{ received: true, processed: false }");
-    expect(funding).toContain('payment_method_types: ["card"]');
+    expect(funding).not.toContain("payment_method_types");
+    expect(funding).toContain("integration_identifier");
+    expect(funding).toContain("idempotencyKey:");
   });
 
   it("never trusts builder-supplied funding or activation state", () => {
@@ -47,7 +53,9 @@ describe("payment safety contracts", () => {
     expect(route).toContain("budgetTotalCents: 0");
     expect(route).toContain("budgetAvailableCents: 0");
     expect(route).toContain('status: "draft"');
-    expect(writes).toContain("status = case when status = 'draft' then 'active'");
+    expect(writes).toContain(
+      "status = case when status = 'draft' then 'active'",
+    );
     expect(form).not.toContain('form.register("budget_available_cents")');
     expect(form).not.toContain('form.register("status")');
   });
@@ -60,7 +68,9 @@ describe("payment safety contracts", () => {
     expect(writes).toContain("pr.status = 'active'");
     expect(writes).toContain("c.status = 'active'");
     expect(writes).toContain("for update of c, pr");
-    expect(writes).toContain('conversionStatus =\n      input.approvalMode === "auto" && hasBudget');
+    expect(writes).toContain(
+      'conversionStatus =\n      input.approvalMode === "auto" && hasBudget',
+    );
     expect(invites).toContain("c.budget_available_cents >= c.cpa_amount_cents");
     expect(conversions).toContain("findConversionAndPayoutByDedup");
   });
@@ -68,8 +78,12 @@ describe("payment safety contracts", () => {
   it("requires a stable conversion deduplication key", () => {
     const validators = read("src/server/lib/validators.ts");
 
-    expect(validators).toContain("value.idempotency_key || value.external_user_id");
-    expect(validators).toContain("A stable idempotency key or external user id is required");
+    expect(validators).toContain(
+      "value.idempotency_key || value.external_user_id",
+    );
+    expect(validators).toContain(
+      "A stable idempotency key or external user id is required",
+    );
 
     expect(
       conversionSchema.safeParse({ ref_code: "ref_123", event_type: "signup" })
@@ -104,7 +118,9 @@ describe("payment safety contracts", () => {
     const creatorRoute = read("src/app/api/public/creators/[id]/route.ts");
     const creatorDirectoryRoute = read("src/app/api/public/creators/route.ts");
     const campaignRoute = read("src/app/api/public/campaigns/[id]/route.ts");
-    const campaignDirectoryRoute = read("src/app/api/public/campaigns/route.ts");
+    const campaignDirectoryRoute = read(
+      "src/app/api/public/campaigns/route.ts",
+    );
 
     expect(reads).not.toContain("select cp.*, u.role");
     expect(reads).toContain("getPublicCampaignById");

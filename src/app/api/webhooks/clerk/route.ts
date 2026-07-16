@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 
@@ -7,22 +6,53 @@ import { createUserIfMissing, deleteUserByClerkId } from "@/server/db/write";
 
 export async function POST(req: Request) {
   if (!env.CLERK_WEBHOOK_SIGNING_SECRET) {
-    return NextResponse.json({ ok: false, error: "Webhook secret missing" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: "Webhook unavailable" },
+      { status: 503 },
+    );
   }
 
-  const svixHeaders = await headers();
-  const payload = await req.text();
+  const svixId = req.headers.get("svix-id");
+  const svixTimestamp = req.headers.get("svix-timestamp");
+  const svixSignature = req.headers.get("svix-signature");
 
-  const wh = new Webhook(env.CLERK_WEBHOOK_SIGNING_SECRET);
+  if (!svixId || !svixTimestamp || !svixSignature) {
+    return NextResponse.json(
+      { ok: false, error: "Missing Clerk webhook headers" },
+      { status: 400 },
+    );
+  }
+
+  const payload = await req.text();
+  let webhook: Webhook;
 
   try {
-    const event = wh.verify(payload, {
-      "svix-id": svixHeaders.get("svix-id") ?? "",
-      "svix-timestamp": svixHeaders.get("svix-timestamp") ?? "",
-      "svix-signature": svixHeaders.get("svix-signature") ?? "",
-    }) as { type: string; data: { id: string } };
+    webhook = new Webhook(env.CLERK_WEBHOOK_SIGNING_SECRET);
+  } catch {
+    console.error("Clerk webhook configuration is invalid");
+    return NextResponse.json(
+      { ok: false, error: "Webhook unavailable" },
+      { status: 503 },
+    );
+  }
 
-    if (event.type === "user.created") {
+  let event: { type: string; data: { id: string } };
+
+  try {
+    event = webhook.verify(payload, {
+      "svix-id": svixId,
+      "svix-timestamp": svixTimestamp,
+      "svix-signature": svixSignature,
+    }) as { type: string; data: { id: string } };
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Invalid Clerk signature" },
+      { status: 400 },
+    );
+  }
+
+  try {
+    if (event.type === "user.created" || event.type === "user.updated") {
       await createUserIfMissing(event.data.id);
     }
 
@@ -32,9 +62,14 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
+    console.error("Clerk webhook processing failed", {
+      eventType: event.type,
+      errorName: error instanceof Error ? error.name : "UnknownError",
+    });
+
     return NextResponse.json(
-      { ok: false, error: error instanceof Error ? error.message : "Invalid signature" },
-      { status: 400 },
+      { ok: false, error: "Webhook processing failed" },
+      { status: 500 },
     );
   }
 }

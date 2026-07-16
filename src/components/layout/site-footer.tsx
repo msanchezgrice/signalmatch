@@ -63,6 +63,30 @@ export function SiteFooter() {
             <Link href="/contact" className="hover:text-[var(--app-text)]">
               Contact
             </Link>
+            <a
+              href="https://x.com/signalmatch"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-[var(--app-text)]"
+            >
+              X
+            </a>
+            <a
+              href="https://www.linkedin.com/company/142897235/"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-[var(--app-text)]"
+            >
+              LinkedIn
+            </a>
+            <a
+              href="https://www.facebook.com/profile.php?id=61560281908301"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-[var(--app-text)]"
+            >
+              Facebook
+            </a>
             {isCreatorFlow ? (
               <>
                 <Link href="/creators" className="hover:text-[var(--app-text)]">
