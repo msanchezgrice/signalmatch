@@ -61,7 +61,10 @@ export async function getCreatorDirectory(filters: DirectoryFilters) {
       cp.channels,
       cp.verification_status
     from creator_profiles cp
+    join users u on u.id = cp.user_id
     where
+      u.clerk_user_id not like 'seed_%'
+      and
       cp.avatar_url is not null
       and cp.bio is not null
       and length(trim(cp.bio)) > 0
@@ -136,6 +139,7 @@ export async function getCreatorById(id: string) {
      from creator_profiles cp
      join users u on u.id = cp.user_id
      where cp.id = $1
+       and u.clerk_user_id not like 'seed_%'
      limit 1`,
     [id],
   );
@@ -161,8 +165,11 @@ export async function getCampaignDirectory(filters: CampaignFilters) {
       p.url as product_url
     from campaigns c
     join products p on p.id = c.product_id
+    join users owner on owner.id = p.owner_user_id
     where
-      ($1::text is null or c.title ilike '%' || $1 || '%')
+      owner.clerk_user_id not like 'seed_%'
+      and lower(p.url) not like '%example.com%'
+      and ($1::text is null or c.title ilike '%' || $1 || '%')
       and (
         coalesce(array_length($2::text[], 1), 0) = 0
         or c.target_tags && $2::text[]
@@ -219,8 +226,11 @@ export async function getPublicCampaignById(campaignId: string) {
        p.url as product_url
      from campaigns c
      join products p on p.id = c.product_id
+     join users owner on owner.id = p.owner_user_id
      where c.id = $1
        and c.status = 'active'
+       and owner.clerk_user_id not like 'seed_%'
+       and lower(p.url) not like '%example.com%'
      limit 1`,
     [campaignId],
   );

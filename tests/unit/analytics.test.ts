@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -80,6 +81,16 @@ describe("analytics provider readiness", () => {
     expect(queue.size()).toBe(1);
     queue.clear();
     expect(queue.size()).toBe(0);
+  });
+
+  it("flushes queued PostHog events from the SDK loaded callback", () => {
+    const provider = readFileSync(
+      "src/components/providers/analytics-provider.tsx",
+      "utf8",
+    );
+
+    expect(provider).toContain("loaded: (client) =>");
+    expect(provider).toContain("posthogQueue.flush(dispatchPostHog)");
   });
 });
 

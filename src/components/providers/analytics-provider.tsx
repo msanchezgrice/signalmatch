@@ -197,6 +197,10 @@ export function AnalyticsProvider({
         capture_pageleave: true,
         respect_dnt: true,
         secure_cookie: true,
+        loaded: (client) => {
+          client.opt_in_capturing();
+          posthogQueue.flush(dispatchPostHog);
+        },
       });
     }
 
