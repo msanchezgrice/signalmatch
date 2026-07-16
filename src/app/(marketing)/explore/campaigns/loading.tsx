@@ -3,6 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function LoadingCampaigns() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-10 md:px-8">
+      <p className="sr-only" role="status">
+        Loading campaigns…
+      </p>
       <Skeleton className="mb-6 h-10 w-72" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, idx) => (

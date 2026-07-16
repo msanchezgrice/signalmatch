@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { getCreatorById } from "@/server/db/read";
@@ -16,12 +17,15 @@ export default async function CreatorDetailPage({ params }: Props) {
     <div className="mx-auto w-full max-w-5xl px-4 py-12 md:px-8">
       <section className="rounded-[2rem] bg-gradient-to-br from-orange-50 via-white to-rose-50 p-7 md:p-10">
         <div className="flex flex-col gap-6 md:flex-row md:items-center">
-          <img
+          <Image
             src={
               (creator.avatar_url as string | null) ??
               "https://api.dicebear.com/9.x/shapes/svg?seed=signalmatch"
             }
             alt={creator.display_name}
+            width={96}
+            height={96}
+            unoptimized
             className="h-24 w-24 rounded-full object-cover"
           />
           <div>

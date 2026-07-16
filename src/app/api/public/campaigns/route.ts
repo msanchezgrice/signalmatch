@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
     | "signup"
     | "activation"
     | "any";
-  const status = (url.searchParams.get("status") ?? "any") as "active" | "any";
   const minCpaCents = Number(url.searchParams.get("min_cpa_cents") ?? "") || undefined;
   const maxCpaCents = Number(url.searchParams.get("max_cpa_cents") ?? "") || undefined;
   const limit = Number(url.searchParams.get("limit") ?? 20);
@@ -21,7 +20,7 @@ export async function GET(req: NextRequest) {
     query,
     tags,
     conversionType,
-    status,
+    status: "active",
     minCpaCents,
     maxCpaCents,
     limit,

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">SignalMatch mark</title>
+  <desc id="desc">Two complementary signal arcs meeting around a coral center point.</desc>
+  <defs>
+    <linearGradient id="iris" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7057ff"/>
+      <stop offset="1" stop-color="#a42cff"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#15e5f2"/>
+      <stop offset="1" stop-color="#00add8"/>
+    </linearGradient>
+    <linearGradient id="coral" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff745f"/>
+      <stop offset="1" stop-color="#ff405f"/>
+    </linearGradient>
+  </defs>
+  <path d="M 512 237 A 275 275 0 1 0 386.5 756.8" fill="none" stroke="url(#iris)" stroke-width="184" stroke-linecap="butt"/>
+  <path d="M 640 268.6 A 275 275 0 0 1 512 787" fill="none" stroke="url(#cyan)" stroke-width="184" stroke-linecap="butt"/>
+  <circle cx="512" cy="512" r="84" fill="url(#coral)"/>
+</svg>

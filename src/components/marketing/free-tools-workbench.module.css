@@ -1,0 +1,261 @@
+.workbench {
+  display: grid;
+  grid-template-columns: minmax(220px, 290px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  padding-bottom: 96px;
+}
+
+.tabs {
+  position: sticky;
+  top: 92px;
+  display: grid;
+  gap: 8px;
+  border: 1px solid #29263a;
+  border-radius: 14px;
+  background: #12111b;
+  padding: 10px;
+}
+
+.tabs button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #c9c4d6;
+  cursor: pointer;
+  font:
+    750 0.9rem/1.2 var(--font-space-grotesk),
+    ui-sans-serif,
+    system-ui;
+  padding: 11px 12px;
+  text-align: left;
+}
+
+.tabs button:hover,
+.tabs .activeTab {
+  background: #211b38;
+  color: #f7f5ff;
+}
+
+.panel {
+  min-width: 0;
+  border: 1px solid #29263a;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(124, 92, 255, 0.11), transparent 180px),
+    #12111b;
+  padding: clamp(22px, 4vw, 38px);
+}
+
+.toolIntro {
+  max-width: 760px;
+  margin-bottom: 26px;
+}
+
+.toolIntro p {
+  margin: 0 0 10px;
+  color: #a78bfa;
+  font:
+    750 0.74rem/1.2 var(--font-plex-mono),
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.toolIntro h2 {
+  margin: 0 0 10px;
+  color: #f7f5ff;
+  font-size: clamp(1.7rem, 3vw, 2.45rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.toolIntro span {
+  color: #aaa4b8;
+  line-height: 1.65;
+}
+
+.formGrid,
+.textGrid,
+.scoreGrid,
+.resultsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.field,
+.textGrid label {
+  display: grid;
+  gap: 8px;
+  color: #d9d5e2;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.inputWrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border: 1px solid #3a3450;
+  border-radius: 8px;
+  background: #08070f;
+}
+
+.inputWrap input,
+.textGrid input {
+  width: 100%;
+  border: 1px solid #3a3450;
+  border-radius: 8px;
+  background: #08070f;
+  color: #f7f5ff;
+  font: inherit;
+  padding: 12px;
+}
+
+.inputWrap input {
+  border: 0;
+}
+
+.inputWrap em {
+  color: #918aa2;
+  font-style: normal;
+  padding-right: 12px;
+}
+
+.result {
+  min-height: 142px;
+  border: 1px solid #3a3450;
+  border-radius: 12px;
+  background: #191724;
+  padding: 18px;
+}
+
+.result span {
+  display: block;
+  color: #aaa4b8;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.result strong {
+  display: block;
+  margin: 8px 0;
+  color: #f7f5ff;
+  font-size: clamp(1.65rem, 4vw, 2.5rem);
+  letter-spacing: -0.05em;
+}
+
+.result p {
+  margin: 0;
+  color: #aaa4b8;
+  line-height: 1.55;
+}
+
+.output,
+.briefOutput {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  border: 1px solid #4a3c7a;
+  border-radius: 12px;
+  background: #08070f;
+  color: #dcd6ff;
+  font:
+    700 0.92rem/1.6 var(--font-plex-mono),
+    ui-monospace,
+    monospace;
+  overflow-wrap: anywhere;
+  padding: 16px;
+}
+
+.briefOutput {
+  min-height: 390px;
+  resize: vertical;
+}
+
+.scoreField {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(140px, 1.2fr) 44px;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #3a3450;
+  border-radius: 10px;
+  background: #191724;
+  color: #d9d5e2;
+  padding: 13px;
+}
+
+.scoreField strong {
+  color: #f7f5ff;
+}
+
+.scoreField input {
+  accent-color: #7c5cff;
+}
+
+.checklist {
+  display: grid;
+  gap: 10px;
+}
+
+.checklist label {
+  display: grid;
+  grid-template-columns: 1px 18px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  border: 1px solid #3a3450;
+  border-radius: 10px;
+  background: #191724;
+  color: #d9d5e2;
+  padding: 14px;
+}
+
+.checklist input {
+  opacity: 0;
+}
+
+.checklist svg {
+  color: #7c5cff;
+}
+
+.checklist label:has(input:checked) {
+  border-color: #5f4ddb;
+  background: #211b38;
+}
+
+.checklist label:has(input:checked) span {
+  color: #f7f5ff;
+  text-decoration: line-through;
+  text-decoration-color: #7c5cff;
+}
+
+@media (max-width: 900px) {
+  .workbench {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .formGrid,
+  .textGrid,
+  .scoreGrid,
+  .resultsGrid,
+  .tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreField {
+    grid-template-columns: 1fr;
+  }
+}

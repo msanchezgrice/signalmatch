@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import {
   findUserByClerkId,
-  getCampaignById,
+  getPublicCampaignById,
   getCampaignDirectory,
   getCampaignPartnershipsForBuilder,
   getCreatorById,
@@ -45,13 +45,18 @@ export function registerMcpTools(server: any) {
         limit: args.limit,
         offset: args.offset,
       });
+      const publicCreators = result.creators.map((creator) =>
+        Object.fromEntries(
+          Object.entries(creator).filter(([key]) => key !== "user_id"),
+        ),
+      );
 
       return {
         content: [
           {
             type: "text",
             text: JSON.stringify(
-              { creators: result.creators, next_offset: result.nextOffset },
+              { creators: publicCreators, next_offset: result.nextOffset },
               null,
               2,
             ),
@@ -102,7 +107,7 @@ export function registerMcpTools(server: any) {
         conversionType: args.conversion_type,
         minCpaCents: args.min_cpa_cents,
         maxCpaCents: args.max_cpa_cents,
-        status: args.status,
+          status: "active",
         limit: args.limit,
         offset: args.offset,
       });
@@ -132,7 +137,7 @@ export function registerMcpTools(server: any) {
       },
     },
     async ({ campaign_id }: any) => {
-      const campaign = await getCampaignById(campaign_id);
+      const campaign = await getPublicCampaignById(campaign_id);
 
       return {
         content: [{ type: "text", text: JSON.stringify({ campaign }, null, 2) }],

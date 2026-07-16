@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -185,7 +186,7 @@ export default function CreatorsPage() {
     <div className={styles.page}>
       <nav className={styles.nav}>
         <Link href="/" className={styles.navLogo}>
-          <div className={styles.navLogoMark}>SM</div>
+          <Image src="/brand/signalmatch-mark.png" alt="" width={28} height={28} priority />
           SignalMatch
         </Link>
         <ul className={styles.navLinks}>
@@ -462,7 +463,7 @@ export default function CreatorsPage() {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <Link href="/" className={styles.navLogo}>
-            <div className={styles.navLogoMark}>SM</div>
+            <Image src="/brand/signalmatch-mark.png" alt="" width={28} height={28} />
             SignalMatch
           </Link>
           <span>© {new Date().getFullYear()} SignalMatch. Builder-first creator marketplace.</span>

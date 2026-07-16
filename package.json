@@ -10,6 +10,10 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "remotion:studio": "remotion studio remotion/index.ts",
+    "remotion:render": "tsx scripts/render-remotion.ts",
+    "remotion:render:all": "tsx scripts/render-remotion.ts --all",
+    "remotion:validate": "remotion compositions remotion/index.ts",
     "format": "prettier . --write"
   },
   "dependencies": {
@@ -40,6 +44,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@remotion/cli": "4.0.489",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/pg": "^8.16.0",
@@ -50,6 +55,7 @@
     "eslint-config-next": "16.1.6",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
+    "remotion": "4.0.489",
     "shadcn": "^3.8.5",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

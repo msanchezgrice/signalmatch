@@ -34,9 +34,9 @@ export async function POST(req: NextRequest) {
       cpaAmountCents: parsed.data.cpa_amount_cents,
       approvalMode: parsed.data.approval_mode,
       approvalTimeoutDays: parsed.data.approval_timeout_days,
-      budgetTotalCents: parsed.data.budget_total_cents,
-      budgetAvailableCents: parsed.data.budget_available_cents,
-      status: parsed.data.status,
+      budgetTotalCents: 0,
+      budgetAvailableCents: 0,
+      status: "draft",
     });
 
     return NextResponse.json({ ok: true, campaign });

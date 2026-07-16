@@ -208,12 +208,16 @@ export async function inviteCreatorToCampaign(input: {
 
 export async function acceptPartnership(partnershipId: string, creatorUserId: string) {
   const { rows } = await sql(
-    `update partnerships
+    `update partnerships pr
      set status = 'active', updated_at = now()
-     where id = $1
-       and creator_user_id = $2
-       and status in ('invited', 'accepted')
-     returning *`,
+     from campaigns c
+     where pr.id = $1
+       and pr.creator_user_id = $2
+       and pr.status in ('invited', 'accepted')
+       and c.id = pr.campaign_id
+       and c.status = 'active'
+       and c.budget_available_cents >= c.cpa_amount_cents
+     returning pr.*`,
     [partnershipId, creatorUserId],
   );
 
@@ -245,6 +249,8 @@ export async function findPartnershipByRefCode(refCode: string) {
      join campaigns c on c.id = pr.campaign_id
      join products p on p.id = c.product_id
      where pr.ref_code = $1
+       and pr.status = 'active'
+       and c.status = 'active'
      limit 1`,
     [refCode],
   );
@@ -303,21 +309,27 @@ export async function createConversionWithBudgetCheck(input: {
   return withTransaction(async (client) => {
     const campaignResult = await client.query<{
       budget_available_cents: number;
+      status: string;
     }>(
-      `select budget_available_cents
-       from campaigns
-       where id = $1
-       for update`,
-      [input.campaignId],
+      `select c.budget_available_cents, c.status
+       from campaigns c
+       join partnerships pr on pr.campaign_id = c.id
+       where c.id = $1
+         and pr.id = $2
+         and pr.status = 'active'
+       for update of c, pr`,
+      [input.campaignId, input.partnershipId],
     );
 
     const campaign = campaignResult.rows[0];
-    if (!campaign) {
-      throw new Error("Campaign not found");
+    if (!campaign || campaign.status !== "active") {
+      throw new Error("Campaign is not active");
     }
 
+    const hasBudget =
+      campaign.budget_available_cents >= input.payoutAmountCents;
     const conversionStatus =
-      input.approvalMode === "auto" ? "approved" : "pending";
+      input.approvalMode === "auto" && hasBudget ? "approved" : "pending";
 
     const conversionResult = await client.query(
       `insert into conversions (
@@ -344,8 +356,7 @@ export async function createConversionWithBudgetCheck(input: {
     let payout: any = null;
 
     if (
-      conversionStatus === "approved" &&
-      campaign.budget_available_cents >= input.payoutAmountCents
+      conversionStatus === "approved"
     ) {
       await client.query(
         `update campaigns
@@ -367,6 +378,56 @@ export async function createConversionWithBudgetCheck(input: {
   });
 }
 
+export async function findConversionAndPayoutByDedup(input: {
+  partnershipId: string;
+  eventType: "signup" | "activation";
+  externalUserId?: string;
+  idempotencyKey?: string;
+}) {
+  const { rows } = await sql(
+    `select
+       cv.*,
+       po.id as payout_id,
+       po.creator_user_id as payout_creator_user_id,
+       po.campaign_id as payout_campaign_id,
+       po.amount_cents as payout_amount_due_cents,
+       po.status as payout_status
+     from conversions cv
+     left join payouts po on po.conversion_id = cv.id
+     where cv.partnership_id = $1
+       and cv.event_type = $2
+       and (
+         ($3::text is not null and cv.idempotency_key = $3)
+         or ($4::text is not null and cv.external_user_id = $4)
+       )
+     limit 1`,
+    [
+      input.partnershipId,
+      input.eventType,
+      input.idempotencyKey ?? null,
+      input.externalUserId ?? null,
+    ],
+  );
+
+  const row = rows[0];
+  if (!row) {
+    return null;
+  }
+
+  return {
+    conversion: row,
+    payout: row.payout_id
+      ? {
+          id: row.payout_id,
+          creator_user_id: row.payout_creator_user_id,
+          campaign_id: row.payout_campaign_id,
+          amount_cents: row.payout_amount_due_cents,
+          status: row.payout_status,
+        }
+      : null,
+  };
+}
+
 export async function markConversionApproved(conversionId: string, builderUserId: string) {
   return withTransaction(async (client) => {
     const conversionResult = await client.query(
@@ -375,13 +436,32 @@ export async function markConversionApproved(conversionId: string, builderUserId
        join partnerships pr on pr.id = cv.partnership_id
        join campaigns c on c.id = pr.campaign_id
        join products p on p.id = c.product_id
-       where cv.id = $1 and p.owner_user_id = $2
+       where cv.id = $1
+         and p.owner_user_id = $2
+         and pr.status = 'active'
+         and c.status = 'active'
        for update`,
       [conversionId, builderUserId],
     );
 
     const conversion = conversionResult.rows[0];
-    if (!conversion || conversion.status !== "pending") {
+    if (!conversion) {
+      return null;
+    }
+
+    if (conversion.status === "approved") {
+      const payoutResult = await client.query(
+        `select * from payouts where conversion_id = $1 limit 1`,
+        [conversion.id],
+      );
+      return {
+        approved: true,
+        conversion,
+        payout: payoutResult.rows[0] ?? null,
+      };
+    }
+
+    if (conversion.status !== "pending") {
       return null;
     }
 
@@ -432,34 +512,40 @@ export async function markConversionApproved(conversionId: string, builderUserId
   });
 }
 
-export async function createFundingEvent(input: {
+export async function recordSuccessfulFunding(input: {
   campaignId: string;
   checkoutSessionId: string;
   amountCents: number;
-  status: "pending" | "succeeded" | "failed";
 }) {
-  await sql(
-    `insert into funding_events (
-      campaign_id,
-      stripe_checkout_session_id,
-      amount_cents,
-      status
-    ) values ($1,$2,$3,$4)
-    on conflict (stripe_checkout_session_id)
-    do update set status = excluded.status`,
-    [input.campaignId, input.checkoutSessionId, input.amountCents, input.status],
-  );
-}
+  return withTransaction(async (client) => {
+    const fundingEvent = await client.query<{ id: string }>(
+      `insert into funding_events (
+        campaign_id,
+        stripe_checkout_session_id,
+        amount_cents,
+        status
+      ) values ($1,$2,$3,'succeeded')
+      on conflict (stripe_checkout_session_id) do nothing
+      returning id`,
+      [input.campaignId, input.checkoutSessionId, input.amountCents],
+    );
 
-export async function applyFundingToCampaign(campaignId: string, amountCents: number) {
-  await sql(
-    `update campaigns
-     set budget_total_cents = budget_total_cents + $2,
-         budget_available_cents = budget_available_cents + $2,
-         updated_at = now()
-     where id = $1`,
-    [campaignId, amountCents],
-  );
+    if (!fundingEvent.rows[0]) {
+      return { applied: false, deduped: true } as const;
+    }
+
+    await client.query(
+      `update campaigns
+       set budget_total_cents = budget_total_cents + $2,
+           budget_available_cents = budget_available_cents + $2,
+           status = case when status = 'draft' then 'active' else status end,
+           updated_at = now()
+       where id = $1`,
+      [input.campaignId, input.amountCents],
+    );
+
+    return { applied: true, deduped: false } as const;
+  });
 }
 
 export async function setCreatorStripeAccount(userId: string, stripeAccountId: string) {

@@ -39,9 +39,6 @@ export const campaignSchema = z.object({
   cpa_amount_cents: z.number().int().nonnegative(),
   approval_mode: z.enum(["auto", "manual"]).default("auto"),
   approval_timeout_days: z.number().int().min(1).max(30).default(7),
-  budget_total_cents: z.number().int().nonnegative(),
-  budget_available_cents: z.number().int().nonnegative(),
-  status: z.enum(["draft", "active", "paused", "ended"]).default("draft"),
 });
 
 export const inviteSchema = z.object({
@@ -49,12 +46,17 @@ export const inviteSchema = z.object({
   terms_snapshot: z.record(z.string(), z.unknown()).default({}),
 });
 
-export const conversionSchema = z.object({
-  ref_code: z.string().min(4),
-  event_type: z.enum(["signup", "activation"]),
-  external_user_id: z.string().max(200).optional(),
-  idempotency_key: z.string().max(200).optional(),
-});
+export const conversionSchema = z
+  .object({
+    ref_code: z.string().min(4),
+    event_type: z.enum(["signup", "activation"]),
+    external_user_id: z.string().max(200).optional(),
+    idempotency_key: z.string().max(200).optional(),
+  })
+  .refine((value) => value.idempotency_key || value.external_user_id, {
+    message: "A stable idempotency key or external user id is required",
+    path: ["idempotency_key"],
+  });
 
 export const searchCreatorsSchema = z.object({
   query: z.string().optional(),

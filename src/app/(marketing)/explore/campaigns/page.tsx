@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { RadioTower, Search } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getMarketingMetadata } from "@/lib/marketing-metadata";
 import { getCampaignDirectory } from "@/server/db/read";
+
+export const metadata: Metadata = getMarketingMetadata("/explore/campaigns");
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -16,7 +21,9 @@ function conversionLabel(type: string) {
   return "Qualified signup";
 }
 
-export default async function ExploreCampaignsPage({ searchParams }: PageProps) {
+export default async function ExploreCampaignsPage({
+  searchParams,
+}: PageProps) {
   const params = await searchParams;
   const query = typeof params.query === "string" ? params.query : undefined;
 
@@ -30,19 +37,22 @@ export default async function ExploreCampaignsPage({ searchParams }: PageProps) 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8">
       <section className="rounded-[2rem] bg-gradient-to-br from-rose-50 via-white to-orange-50 p-7 md:p-10">
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-zinc-500">
+        <p className="text-sm font-medium tracking-[0.16em] text-zinc-500 uppercase">
           Products shared by creators
         </p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
+        <h1 className="mt-3 max-w-3xl text-4xl leading-tight font-semibold tracking-tight md:text-6xl">
           Find paid partnerships for products you actually trust.
         </h1>
         <p className="mt-4 max-w-2xl text-zinc-600">
-          Browse live offers from builders. Pick campaigns that match your audience and content style,
-          then get paid for approved outcomes.
+          Browse live offers from builders. Pick campaigns that match your
+          audience and content style, then get paid for approved outcomes.
         </p>
-        <form className="mt-6 flex w-full max-w-xl items-center gap-2" action="/explore/campaigns">
+        <form
+          className="mt-6 flex w-full max-w-xl items-center gap-2"
+          action="/explore/campaigns"
+        >
           <div className="relative w-full">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-400" />
             <Input
               className="h-11 rounded-full border-zinc-300 bg-white pl-9"
               name="query"
@@ -55,8 +65,22 @@ export default async function ExploreCampaignsPage({ searchParams }: PageProps) 
 
       <section className="mt-8 overflow-hidden rounded-3xl border border-zinc-200/80 bg-white/95">
         {data.campaigns.length === 0 ? (
-          <div className="px-6 py-10 text-sm text-zinc-600 md:px-8">
-            No campaigns matched your search yet.
+          <div className="flex flex-col items-center px-6 py-14 text-center md:px-8">
+            <span className="grid size-12 place-items-center rounded-2xl bg-rose-100 text-rose-700">
+              <RadioTower className="size-5" aria-hidden="true" />
+            </span>
+            <h2 className="mt-4 text-lg font-semibold tracking-tight">
+              No campaigns matched this search
+            </h2>
+            <p className="mt-2 max-w-md text-sm leading-6 text-zinc-600">
+              Try a product category or audience term, or clear the search to
+              see every active opportunity.
+            </p>
+            {query ? (
+              <Button asChild variant="outline" className="mt-5">
+                <Link href="/explore/campaigns">Clear search</Link>
+              </Button>
+            ) : null}
           </div>
         ) : null}
 
@@ -64,11 +88,18 @@ export default async function ExploreCampaignsPage({ searchParams }: PageProps) 
           const tags = (campaign.target_tags as string[]) ?? [];
 
           return (
-            <Link key={campaign.campaign_id} href={`/explore/campaigns/${campaign.campaign_id}`}>
-              <article className="grid gap-4 border-b border-zinc-200/80 px-6 py-5 transition hover:bg-rose-50/50 last:border-b-0 md:grid-cols-[1.8fr_0.9fr_0.5fr] md:items-center md:px-8">
+            <Link
+              key={campaign.campaign_id}
+              href={`/explore/campaigns/${campaign.campaign_id}`}
+            >
+              <article className="grid gap-4 border-b border-zinc-200/80 px-6 py-5 transition last:border-b-0 hover:bg-rose-50/50 md:grid-cols-[1.8fr_0.9fr_0.5fr] md:items-center md:px-8">
                 <div>
-                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{campaign.title}</p>
-                  <p className="mt-1 text-sm text-zinc-600">{campaign.product_name}</p>
+                  <p className="text-lg font-semibold tracking-tight text-zinc-900">
+                    {campaign.title}
+                  </p>
+                  <p className="mt-1 text-sm text-zinc-600">
+                    {campaign.product_name}
+                  </p>
                   <p className="mt-2 line-clamp-2 text-sm text-zinc-600">
                     {campaign.brief || "No campaign brief added yet."}
                   </p>
@@ -86,16 +117,21 @@ export default async function ExploreCampaignsPage({ searchParams }: PageProps) 
 
                 <div className="text-sm text-zinc-700">
                   <p>
-                    <span className="font-medium text-zinc-900">Payout:</span>{" "}
-                    ${(campaign.cpa_amount_cents / 100).toFixed(2)} per approved outcome
+                    <span className="font-medium text-zinc-900">Payout:</span> $
+                    {(campaign.cpa_amount_cents / 100).toFixed(2)} per approved
+                    outcome
                   </p>
                   <p className="mt-1">
-                    <span className="font-medium text-zinc-900">Counts as:</span>{" "}
+                    <span className="font-medium text-zinc-900">
+                      Counts as:
+                    </span>{" "}
                     {conversionLabel(campaign.conversion_type)}
                   </p>
                 </div>
 
-                <p className="text-sm font-medium text-zinc-900 md:text-right">View terms →</p>
+                <p className="text-sm font-medium text-zinc-900 md:text-right">
+                  View terms →
+                </p>
               </article>
             </Link>
           );

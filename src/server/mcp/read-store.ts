@@ -1,6 +1,6 @@
 import {
   findUserByClerkId,
-  getCampaignById,
+  getPublicCampaignById,
   getCampaignDirectory,
   getCampaignPartnershipsForBuilder,
   getCreatorById,
@@ -11,7 +11,7 @@ import {
 
 export {
   findUserByClerkId,
-  getCampaignById,
+  getPublicCampaignById,
   getCampaignDirectory,
   getCampaignPartnershipsForBuilder,
   getCreatorById,

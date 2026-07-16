@@ -10,17 +10,28 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const useCustomShell = pathname === "/" || pathname === "/creators";
   const isCreatorFlow =
-    pathname.startsWith("/creators") || pathname.startsWith("/explore/campaigns");
-  const flowThemeClass = isCreatorFlow ? "app-theme-creator" : "app-theme-builder";
+    pathname.startsWith("/creators") ||
+    pathname.startsWith("/explore/campaigns");
+  const flowThemeClass = isCreatorFlow
+    ? "app-theme-creator"
+    : "app-theme-builder";
 
   if (useCustomShell) {
-    return <div className={`marketing-shell ${flowThemeClass} min-h-screen bg-transparent`}>{children}</div>;
+    return (
+      <div
+        className={`marketing-shell ${flowThemeClass} min-h-screen bg-transparent`}
+      >
+        {children}
+      </div>
+    );
   }
 
   return (
-    <div className={`marketing-shell ${flowThemeClass} min-h-screen bg-transparent`}>
+    <div
+      className={`marketing-shell ${flowThemeClass} min-h-screen bg-transparent`}
+    >
       <SiteHeader />
-      <main>{children}</main>
+      <main id="main-content">{children}</main>
       <SiteFooter />
     </div>
   );

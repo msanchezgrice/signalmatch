@@ -1,7 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getMarketingMetadata } from "@/lib/marketing-metadata";
+
+export const metadata: Metadata = getMarketingMetadata("/builders");
 
 const builderSteps = [
   "Create a product and generate your conversion API key.",
@@ -23,12 +27,16 @@ export default function BuildersPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-20">
       <section className="rounded-[2rem] bg-gradient-to-br from-amber-50 via-white to-orange-100 p-8 md:p-12">
-        <Badge className="bg-zinc-900/90 text-white hover:bg-zinc-900">Builder guide</Badge>
-        <h1 className="mt-4 max-w-4xl text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
+        <Badge className="bg-zinc-900/90 text-white hover:bg-zinc-900">
+          Builder guide
+        </Badge>
+        <h1 className="mt-4 max-w-4xl text-4xl leading-tight font-semibold tracking-tight md:text-6xl">
           Builder workflow from first campaign to first approved payout.
         </h1>
         <p className="mt-5 max-w-3xl text-lg text-zinc-700">
-          SignalMatch is designed for outcome-based creator growth. You define conversion quality, recruit aligned creators, and pay only when outcomes are approved.
+          SignalMatch is designed for outcome-based creator growth. You define
+          conversion quality, recruit aligned creators, and pay only when
+          outcomes are approved.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href="/builders/sign-up">
@@ -45,17 +53,24 @@ export default function BuildersPage() {
       <section className="mt-10 grid gap-6 md:grid-cols-5">
         {builderSteps.map((step, index) => (
           <div key={step} className="border-l-2 border-orange-300 pl-4">
-            <p className="text-xs uppercase tracking-[0.14em] text-zinc-500">{index + 1}</p>
+            <p className="text-xs tracking-[0.14em] text-zinc-500 uppercase">
+              {index + 1}
+            </p>
             <p className="mt-2 text-sm text-zinc-700">{step}</p>
           </div>
         ))}
       </section>
 
       <section className="mt-10 rounded-3xl border border-zinc-200 bg-white p-7 md:p-10">
-        <h2 className="text-2xl font-semibold tracking-tight">Launch checklist</h2>
+        <h2 className="text-2xl font-semibold tracking-tight">
+          Launch checklist
+        </h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {launchChecklist.map((item) => (
-            <p key={item} className="border-b border-dashed border-zinc-300 pb-2 text-sm text-zinc-700">
+            <p
+              key={item}
+              className="border-b border-dashed border-zinc-300 pb-2 text-sm text-zinc-700"
+            >
               {item}
             </p>
           ))}

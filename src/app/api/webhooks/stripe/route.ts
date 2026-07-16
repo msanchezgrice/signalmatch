@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { env } from "@/server/env";
 import { stripe } from "@/server/stripe";
-import { applyFundingToCampaign, createFundingEvent } from "@/server/db/write";
+import { recordSuccessfulFunding } from "@/server/db/write";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -20,23 +20,33 @@ export async function POST(req: Request) {
       env.STRIPE_WEBHOOK_SECRET,
     );
 
-    if (event.type === "checkout.session.completed") {
+    if (
+      event.type === "checkout.session.completed" ||
+      event.type === "checkout.session.async_payment_succeeded"
+    ) {
       const session = event.data.object;
       const campaignId = session.metadata?.campaign_id;
       const amount = session.amount_total ?? 0;
 
-      if (campaignId) {
-        await createFundingEvent({
-          campaignId,
-          checkoutSessionId: session.id,
-          amountCents: amount,
-          status: "succeeded",
-        });
-        await applyFundingToCampaign(campaignId, amount);
+      if (
+        !campaignId ||
+        session.payment_status !== "paid" ||
+        session.currency !== "usd" ||
+        amount <= 0
+      ) {
+        // Acknowledge valid Stripe events that are unrelated, unpaid, or not yet
+        // final so Stripe does not retry them as delivery failures.
+        return NextResponse.json({ received: true, processed: false });
       }
+
+      await recordSuccessfulFunding({
+        campaignId,
+        checkoutSessionId: session.id,
+        amountCents: amount,
+      });
     }
 
-    return NextResponse.json({ received: true });
+    return NextResponse.json({ received: true, processed: true });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "Invalid signature" },

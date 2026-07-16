@@ -27,6 +27,11 @@ export async function GET(req: NextRequest) {
     limit,
     offset,
   });
+  const publicCreators = data.creators.map((creator) =>
+    Object.fromEntries(
+      Object.entries(creator).filter(([key]) => key !== "user_id"),
+    ),
+  );
 
-  return NextResponse.json({ creators: data.creators, next_offset: data.nextOffset });
+  return NextResponse.json({ creators: publicCreators, next_offset: data.nextOffset });
 }

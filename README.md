@@ -36,6 +36,14 @@ pnpm dev
 - `pnpm build`
 - `pnpm format`
 
+## Production launch requirements
+
+- Vercel production must use Clerk `pk_live_` / `sk_live_` keys and a verified Clerk webhook at `/api/webhooks/clerk`.
+- Stripe must use an `sk_live_` key, a live webhook at `/api/webhooks/stripe`, and Connect must be enabled for creator payouts.
+- Preview and local development may use Clerk and Stripe test keys.
+- Apply every migration in `supabase/migrations` before promoting a deployment.
+- Analytics and ad tags are optional at build time and activate only when their public IDs are configured. Keep them consent-gated.
+
 ## Core routes
 - Marketing: `/`, `/builders`, `/creators`, `/explore/creators`, `/explore/campaigns`
 - App: `/app/*`
