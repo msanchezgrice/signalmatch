@@ -49,6 +49,12 @@ export const marketingMetadata: Record<string, MarketingMetadataEntry> = {
       "Use practical guides for creator CPA economics, attribution, campaign briefs, disclosure, conversion review, fraud controls, and fair payouts.",
     canonical: "/resources",
   },
+  "/tools": {
+    title: "Free Creator Campaign Calculators and Tools | SignalMatch",
+    description:
+      "Use free creator campaign calculators, UTM builders, scorecards, attribution planners, campaign brief generators, and conversion tracking checklists.",
+    canonical: "/tools",
+  },
   "/about": {
     title: "About the SignalMatch Creator Marketplace | SignalMatch",
     description:

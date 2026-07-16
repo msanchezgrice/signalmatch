@@ -16,6 +16,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
     },
+    {
+      url: `${site}/tools`,
+      lastModified: updated,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
     ...["builders", "creators", "explore/campaigns", "explore/creators"].map(
       (path) => ({
         url: `${site}/${path}`,

@@ -24,6 +24,23 @@ test("marketing content remains visible without JavaScript", async ({
   await context.close();
 });
 
+test("free tools page renders calculators and generators", async ({ page }) => {
+  await page.goto("/tools");
+
+  await expect(
+    page.getByRole("heading", {
+      name: /calculate the campaign before you invite the creator/i,
+    }),
+  ).toBeVisible();
+
+  await expect(page.getByText("Suggested max CPA")).toBeVisible();
+  await page
+    .getByRole("tab", { name: /utm builder/i })
+    .click();
+  await expect(page.getByText(/utm_source=youtube/i)).toBeVisible();
+  await expect(page.getByText(/ref=CREATOR42/i)).toBeVisible();
+});
+
 test("consented analytics records the initial page view after tags initialize", async ({
   page,
 }) => {

@@ -46,6 +46,9 @@ export function SiteHeader() {
               <Link href="/resources" className="hover:text-[var(--app-text)]">
                 Resources
               </Link>
+              <Link href="/tools" className="hover:text-[var(--app-text)]">
+                Tools
+              </Link>
               {isCreatorFlow ? (
                 <>
                   <Link
