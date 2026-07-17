@@ -1,6 +1,7 @@
 import "server-only";
 
 import { assertSafePublicWebsiteUrl } from "@/server/lib/safe-url";
+import { extractProductEvidenceFromHtml } from "@/server/lib/product-evidence";
 
 const MAX_RESPONSE_BYTES = 2_000_000;
 const MAX_REDIRECTS = 5;
@@ -172,6 +173,7 @@ export type SiteAnalysis = {
   source: "direct" | "fallback";
   title: string | null;
   summary: string | null;
+  image_url: string | null;
   key_points: string[];
   category_tags: string[];
   target_personas: Array<{ name: string; rationale: string }>;
@@ -344,6 +346,9 @@ export async function analyzeSite(url: string): Promise<SiteAnalysis> {
         .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
     : body;
   const fallback = looksLikeHtml ? null : parsePlainTextFallback(body);
+  const evidence = looksLikeHtml
+    ? extractProductEvidenceFromHtml(body, finalUrl)
+    : null;
 
   const title = looksLikeHtml
     ? extractFirstMatch(htmlWithoutScripts, /<title[^>]*>([\s\S]*?)<\/title>/i)
@@ -384,6 +389,7 @@ export async function analyzeSite(url: string): Promise<SiteAnalysis> {
     source,
     title,
     summary: description ?? null,
+    image_url: evidence?.imageUrl ?? null,
     key_points: keyPoints,
     category_tags: topKeywords(corpus),
     target_personas: inferPersonas(corpus),

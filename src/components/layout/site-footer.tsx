@@ -99,10 +99,16 @@ export function SiteFooter() {
                   Success Stories
                 </Link>
                 <Link
+                  href="/explore/products"
+                  className="hover:text-[var(--app-text)]"
+                >
+                  Products
+                </Link>
+                <Link
                   href="/explore/campaigns"
                   className="hover:text-[var(--app-text)]"
                 >
-                  Products Shared
+                  Campaigns
                 </Link>
                 <Link
                   href="/creators/sign-up"

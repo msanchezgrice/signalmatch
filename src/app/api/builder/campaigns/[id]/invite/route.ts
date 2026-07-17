@@ -20,13 +20,13 @@ export async function POST(
     }
 
     const ownership = await sql(
-      `select c.id
+      `select c.id, p.is_portfolio_owned
        from campaigns c
        join products p on p.id = c.product_id
        where c.id = $1
          and p.owner_user_id = $2
          and c.status = 'active'
-         and c.budget_available_cents >= c.cpa_amount_cents
+         and (p.is_portfolio_owned or c.budget_available_cents >= c.cpa_amount_cents)
        limit 1`,
       [id, authContext.userId],
     );

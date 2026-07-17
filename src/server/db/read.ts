@@ -4,6 +4,7 @@ import { sql } from "@/server/db";
 import type {
   CampaignDirectoryItem,
   CreatorDirectoryItem,
+  ProductDirectoryItem,
   UserRole,
 } from "@/server/db/types";
 
@@ -172,14 +173,32 @@ export async function getCampaignDirectory(filters: CampaignFilters) {
       c.cpa_amount_cents,
       c.status,
       p.name as product_name,
-      p.url as product_url
+      p.url as product_url,
+      p.description as product_description,
+      p.category_tags as product_category_tags,
+      p.screenshot_url as product_screenshot_url,
+      p.website_title as product_website_title,
+      p.website_description as product_website_description,
+      p.verified_at as product_verified_at,
+      p.is_portfolio_owned
     from campaigns c
     join products p on p.id = c.product_id
     join users owner on owner.id = p.owner_user_id
     where
       owner.clerk_user_id not like 'seed_%'
       and lower(p.url) not like '%example.com%'
-      and ($1::text is null or c.title ilike '%' || $1 || '%')
+      and (
+        $1::text is null
+        or concat_ws(
+          ' ',
+          c.title,
+          c.brief,
+          p.name,
+          p.description,
+          array_to_string(c.target_tags, ' '),
+          array_to_string(p.category_tags, ' ')
+        ) ilike '%' || $1 || '%'
+      )
       and (
         coalesce(array_length($2::text[], 1), 0) = 0
         or c.target_tags && $2::text[]
@@ -211,7 +230,14 @@ export async function getCampaignDirectory(filters: CampaignFilters) {
 
 export async function getCampaignById(campaignId: string) {
   const { rows } = await sql(
-    `select c.*, p.name as product_name, p.url as product_url, p.owner_user_id
+    `select c.*, p.name as product_name, p.url as product_url, p.owner_user_id,
+            p.description as product_description,
+            p.category_tags as product_category_tags,
+            p.screenshot_url as product_screenshot_url,
+            p.website_title as product_website_title,
+            p.website_description as product_website_description,
+            p.verified_at as product_verified_at,
+            p.is_portfolio_owned
      from campaigns c
      join products p on p.id = c.product_id
      where c.id = $1
@@ -232,8 +258,16 @@ export async function getPublicCampaignById(campaignId: string) {
        c.conversion_type,
        c.cpa_amount_cents,
        c.status,
+       p.id as product_id,
        p.name as product_name,
-       p.url as product_url
+       p.url as product_url,
+       p.description as product_description,
+       p.category_tags as product_category_tags,
+       p.screenshot_url as product_screenshot_url,
+       p.website_title as product_website_title,
+       p.website_description as product_website_description,
+       p.verified_at as product_verified_at,
+       p.is_portfolio_owned
      from campaigns c
      join products p on p.id = c.product_id
      join users owner on owner.id = p.owner_user_id
@@ -246,6 +280,119 @@ export async function getPublicCampaignById(campaignId: string) {
   );
 
   return rows[0] ?? null;
+}
+
+export async function getProductDirectory(input?: {
+  query?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const limit = Math.min(input?.limit ?? 24, 50);
+  const offset = input?.offset ?? 0;
+  const { rows } = await sql<ProductDirectoryItem>(
+    `select
+       p.id as product_id,
+       p.name,
+       p.url,
+       p.description,
+       p.category_tags,
+       p.pricing_type,
+       p.screenshot_url,
+       p.website_title,
+       p.website_description,
+       p.verified_at,
+       p.is_portfolio_owned,
+       count(c.id)::int as campaign_count,
+       coalesce(max(c.cpa_amount_cents), 0)::int as max_cpa_amount_cents
+     from products p
+     join users owner on owner.id = p.owner_user_id
+     join campaigns c on c.product_id = p.id and c.status = 'active'
+     where p.status = 'active'
+       and owner.clerk_user_id not like 'seed_%'
+       and lower(p.url) not like '%example.com%'
+       and (
+         $1::text is null
+         or concat_ws(
+           ' ',
+           p.name,
+           p.description,
+           array_to_string(p.category_tags, ' ')
+         ) ilike '%' || $1 || '%'
+       )
+     group by p.id
+     order by p.verified_at desc nulls last, p.created_at desc
+     limit $2 offset $3`,
+    [input?.query ?? null, limit, offset],
+  );
+
+  return {
+    products: rows,
+    nextOffset: rows.length === limit ? offset + limit : null,
+  };
+}
+
+export async function getPublicProductById(productId: string) {
+  const { rows } = await sql(
+    `select
+       p.id as product_id,
+       p.name,
+       p.url,
+       p.description,
+       p.category_tags,
+       p.pricing_type,
+       p.screenshot_url,
+       p.website_title,
+       p.website_description,
+       p.verified_at,
+       p.is_portfolio_owned
+     from products p
+     join users owner on owner.id = p.owner_user_id
+     where p.id = $1
+       and p.status = 'active'
+       and owner.clerk_user_id not like 'seed_%'
+       and lower(p.url) not like '%example.com%'
+       and exists (
+         select 1 from campaigns c
+         where c.product_id = p.id and c.status = 'active'
+       )
+     limit 1`,
+    [productId],
+  );
+
+  return rows[0] ?? null;
+}
+
+export async function getPublicCampaignsByProductId(productId: string) {
+  const { rows } = await sql<CampaignDirectoryItem>(
+    `select
+       c.id as campaign_id,
+       c.product_id,
+       c.title,
+       c.brief,
+       c.target_tags,
+       c.conversion_type,
+       c.cpa_amount_cents,
+       c.status,
+       p.name as product_name,
+       p.url as product_url,
+       p.description as product_description,
+       p.category_tags as product_category_tags,
+       p.screenshot_url as product_screenshot_url,
+       p.website_title as product_website_title,
+       p.website_description as product_website_description,
+       p.verified_at as product_verified_at,
+       p.is_portfolio_owned
+     from campaigns c
+     join products p on p.id = c.product_id
+     join users owner on owner.id = p.owner_user_id
+     where c.product_id = $1
+       and c.status = 'active'
+       and owner.clerk_user_id not like 'seed_%'
+     order by c.created_at desc`,
+    [productId],
+  );
+
+  return rows;
 }
 
 export async function getBuilderProducts(builderUserId: string) {

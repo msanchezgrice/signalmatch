@@ -11,7 +11,8 @@ export function SiteHeader() {
   const pathname = usePathname();
   const isCreatorFlow =
     pathname.startsWith("/creators") ||
-    pathname.startsWith("/explore/campaigns");
+    pathname.startsWith("/explore/campaigns") ||
+    pathname.startsWith("/explore/products");
   const onCreatorSignUp = pathname.startsWith("/creators/sign-up");
   const onCreatorSignIn = pathname.startsWith("/creators/sign-in");
   const onCreatorAuthFlow = onCreatorSignUp || onCreatorSignIn;
@@ -58,10 +59,16 @@ export function SiteHeader() {
                     Success Stories
                   </Link>
                   <Link
+                    href="/explore/products"
+                    className="hover:text-[var(--app-text)]"
+                  >
+                    Products
+                  </Link>
+                  <Link
                     href="/explore/campaigns"
                     className="hover:text-[var(--app-text)]"
                   >
-                    Products Shared
+                    Campaigns
                   </Link>
                   <Link
                     href="/creators"

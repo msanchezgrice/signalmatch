@@ -31,4 +31,27 @@ export type CampaignDirectoryItem = {
   status: "draft" | "active" | "paused" | "ended";
   product_name: string;
   product_url: string;
+  product_description: string | null;
+  product_category_tags: string[];
+  product_screenshot_url: string | null;
+  product_website_title: string | null;
+  product_website_description: string | null;
+  product_verified_at: string | null;
+  is_portfolio_owned: boolean;
+};
+
+export type ProductDirectoryItem = {
+  product_id: string;
+  name: string;
+  url: string;
+  description: string | null;
+  category_tags: string[];
+  pricing_type: "free" | "freemium" | "paid";
+  screenshot_url: string | null;
+  website_title: string | null;
+  website_description: string | null;
+  verified_at: string | null;
+  is_portfolio_owned: boolean;
+  campaign_count: number;
+  max_cpa_amount_cents: number;
 };

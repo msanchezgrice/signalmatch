@@ -9,6 +9,8 @@ import {
 } from "@/server/lib/creator-profile-prefill";
 import { analyzeSite } from "@/server/lib/site-analyzer";
 import { enforceRateLimit } from "@/server/rate-limit";
+import { getCampaignDirectory } from "@/server/db/read";
+import { rankCampaignsForCreator } from "@/lib/campaign-recommendations";
 
 type Platform = "linkedin" | "x";
 
@@ -545,11 +547,26 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const campaignDirectory = await getCampaignDirectory({
+      status: "active",
+      limit: 50,
+      offset: 0,
+    }).catch(() => ({ campaigns: [], nextOffset: null }));
+    const recommendations = rankCampaignsForCreator(
+      campaignDirectory.campaigns,
+      {
+        audienceTags: prefill.audience_tags ?? [],
+        niches: prefill.niches ?? [],
+        toolStack: prefill.tool_stack ?? [],
+      },
+    );
+
     const response = NextResponse.json({
       ok: true,
       prefill,
       prefill_token: token,
       analysis,
+      recommendations,
     });
     const cookieDomain = resolveCookieDomain(req);
 
