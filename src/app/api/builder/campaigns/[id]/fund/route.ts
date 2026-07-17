@@ -47,7 +47,7 @@ export async function POST(
     }
 
     const ownership = await sql(
-      `select c.id
+      `select c.id, p.is_portfolio_owned
        from campaigns c
        join products p on p.id = c.product_id
        where c.id = $1 and p.owner_user_id = $2
@@ -55,11 +55,23 @@ export async function POST(
       [id, authContext.userId],
     );
 
-    if (!ownership.rows[0]) {
+    const ownedCampaign = ownership.rows[0] as
+      | { id: string; is_portfolio_owned: boolean }
+      | undefined;
+
+    if (!ownedCampaign) {
       return NextResponse.json(
         { ok: false, error: "Campaign not found" },
         { status: 404 },
       );
+    }
+
+    if (ownedCampaign.is_portfolio_owned) {
+      return NextResponse.json({
+        ok: true,
+        waived: true,
+        funding_model: "portfolio_credit",
+      });
     }
 
     const session = await stripe.checkout.sessions.create(

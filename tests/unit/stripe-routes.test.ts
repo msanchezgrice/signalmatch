@@ -105,6 +105,25 @@ describe("Stripe route behavior", () => {
     });
   });
 
+  it("waives Stripe checkout for a database-trusted portfolio campaign", async () => {
+    mocks.sql.mockResolvedValue({
+      rows: [{ id: campaignId, is_portfolio_owned: true }],
+    });
+
+    const response = await fundCampaign(
+      fundingRequest({
+        amount_cents: 10_000,
+        idempotency_key: "request_123456789",
+      }),
+      requestContext,
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toMatchObject({ ok: true, waived: true });
+    expect(mocks.createCheckoutSession).not.toHaveBeenCalled();
+  });
+
   it("returns a generic 400 for an invalid webhook signature", async () => {
     mocks.constructEvent.mockImplementation(() => {
       throw new Error("raw signature details");

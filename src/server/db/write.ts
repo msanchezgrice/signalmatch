@@ -83,6 +83,10 @@ export async function createProduct(input: {
   categoryTags?: string[];
   pricingType: "free" | "freemium" | "paid";
   conversionApiKeyHash?: string;
+  websiteTitle?: string;
+  websiteDescription?: string;
+  screenshotUrl?: string;
+  verifiedAt?: Date;
 }) {
   const { rows } = await sql(
     `insert into products (
@@ -92,8 +96,12 @@ export async function createProduct(input: {
       description,
       category_tags,
       pricing_type,
-      conversion_api_key_hash
-    ) values ($1, $2, $3, $4, $5, $6, $7)
+      conversion_api_key_hash,
+      website_title,
+      website_description,
+      screenshot_url,
+      verified_at
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
     returning *`,
     [
       input.ownerUserId,
@@ -103,6 +111,10 @@ export async function createProduct(input: {
       input.categoryTags ?? [],
       input.pricingType,
       input.conversionApiKeyHash ?? null,
+      input.websiteTitle ?? null,
+      input.websiteDescription ?? null,
+      input.screenshotUrl ?? null,
+      input.verifiedAt ?? null,
     ],
   );
 
@@ -210,13 +222,14 @@ export async function acceptPartnership(partnershipId: string, creatorUserId: st
   const { rows } = await sql(
     `update partnerships pr
      set status = 'active', updated_at = now()
-     from campaigns c
+     from campaigns c, products p
      where pr.id = $1
        and pr.creator_user_id = $2
        and pr.status in ('invited', 'accepted')
        and c.id = pr.campaign_id
+       and p.id = c.product_id
        and c.status = 'active'
-       and c.budget_available_cents >= c.cpa_amount_cents
+       and (p.is_portfolio_owned or c.budget_available_cents >= c.cpa_amount_cents)
      returning pr.*`,
     [partnershipId, creatorUserId],
   );
@@ -244,6 +257,7 @@ export async function findPartnershipByRefCode(refCode: string) {
       c.budget_total_cents,
       p.id as product_id,
       p.url as product_url,
+      p.is_portfolio_owned,
       p.conversion_api_key_hash
      from partnerships pr
      join campaigns c on c.id = pr.campaign_id
@@ -310,10 +324,12 @@ export async function createConversionWithBudgetCheck(input: {
     const campaignResult = await client.query<{
       budget_available_cents: number;
       status: string;
+      is_portfolio_owned: boolean;
     }>(
-      `select c.budget_available_cents, c.status
+      `select c.budget_available_cents, c.status, p.is_portfolio_owned
        from campaigns c
        join partnerships pr on pr.campaign_id = c.id
+       join products p on p.id = c.product_id
        where c.id = $1
          and pr.id = $2
          and pr.status = 'active'
@@ -327,6 +343,7 @@ export async function createConversionWithBudgetCheck(input: {
     }
 
     const hasBudget =
+      campaign.is_portfolio_owned ||
       campaign.budget_available_cents >= input.payoutAmountCents;
     const conversionStatus =
       input.approvalMode === "auto" && hasBudget ? "approved" : "pending";
@@ -358,13 +375,15 @@ export async function createConversionWithBudgetCheck(input: {
     if (
       conversionStatus === "approved"
     ) {
-      await client.query(
-        `update campaigns
-         set budget_available_cents = budget_available_cents - $2,
-             updated_at = now()
-         where id = $1`,
-        [input.campaignId, input.payoutAmountCents],
-      );
+      if (!campaign.is_portfolio_owned) {
+        await client.query(
+          `update campaigns
+           set budget_available_cents = budget_available_cents - $2,
+               updated_at = now()
+           where id = $1`,
+          [input.campaignId, input.payoutAmountCents],
+        );
+      }
 
       payout = await createApprovedPayout(client, {
         creatorUserId: input.creatorUserId,
@@ -431,7 +450,8 @@ export async function findConversionAndPayoutByDedup(input: {
 export async function markConversionApproved(conversionId: string, builderUserId: string) {
   return withTransaction(async (client) => {
     const conversionResult = await client.query(
-      `select cv.*, pr.creator_user_id, pr.campaign_id, c.cpa_amount_cents
+      `select cv.*, pr.creator_user_id, pr.campaign_id, c.cpa_amount_cents,
+              p.is_portfolio_owned
        from conversions cv
        join partnerships pr on pr.id = cv.partnership_id
        join campaigns c on c.id = pr.campaign_id
@@ -472,7 +492,7 @@ export async function markConversionApproved(conversionId: string, builderUserId
 
     const budget = campaignBudgetResult.rows[0]?.budget_available_cents ?? 0;
 
-    if (budget < conversion.payout_amount_cents) {
+    if (!conversion.is_portfolio_owned && budget < conversion.payout_amount_cents) {
       return {
         conversion,
         payout: null,
@@ -481,13 +501,15 @@ export async function markConversionApproved(conversionId: string, builderUserId
       };
     }
 
-    await client.query(
-      `update campaigns
-       set budget_available_cents = budget_available_cents - $2,
-           updated_at = now()
-       where id = $1`,
-      [conversion.campaign_id, conversion.payout_amount_cents],
-    );
+    if (!conversion.is_portfolio_owned) {
+      await client.query(
+        `update campaigns
+         set budget_available_cents = budget_available_cents - $2,
+             updated_at = now()
+         where id = $1`,
+        [conversion.campaign_id, conversion.payout_amount_cents],
+      );
+    }
 
     const updateConversion = await client.query(
       `update conversions

@@ -16,6 +16,13 @@ type AnalyzerResponse = {
     niches?: string[];
     tool_stack?: string[];
   };
+  recommendations?: Array<{
+    campaignId: string;
+    productName: string;
+    title: string;
+    reason: string;
+    cpaAmountCents: number;
+  }>;
 };
 
 const steps = [
@@ -107,6 +114,9 @@ export default function CreatorsPage() {
   const [profileInput, setProfileInput] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<AnalyzerResponse["prefill"] | null>(null);
+  const [recommendations, setRecommendations] = useState<
+    NonNullable<AnalyzerResponse["recommendations"]>
+  >([]);
 
   const [reach, setReach] = useState(5000);
   const [convRate, setConvRate] = useState(2);
@@ -136,18 +146,6 @@ export default function CreatorsPage() {
   const conversions = useMemo(() => Math.round(reach * (convRate / 100)), [reach, convRate]);
   const earnings = useMemo(() => Math.round(conversions * cpa), [conversions, cpa]);
 
-  const suggested = useMemo(() => {
-    const audienceLabel = analysis?.audience_tags?.[0]?.replaceAll("-", " ") ?? "your audience";
-    const nicheLabel = analysis?.niches?.[0]?.replaceAll("-", " ") ?? "operators";
-    const stackLabel = analysis?.tool_stack?.[0] ?? "technical readers";
-
-    return [
-      { text: `Sales Call Copilot — perfect for ${audienceLabel}`, cpaLabel: "$15/conv" },
-      { text: `AI Note Assistant — matches your ${nicheLabel} followers`, cpaLabel: "$8/conv" },
-      { text: `Dev Docs AI — strong overlap with ${stackLabel}`, cpaLabel: "$12/conv" },
-    ];
-  }, [analysis]);
-
   async function runAnalyze() {
     const value = profileInput.trim();
     if (!value) {
@@ -171,6 +169,7 @@ export default function CreatorsPage() {
       }
 
       setAnalysis(json.prefill);
+      setRecommendations(json.recommendations ?? []);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not analyze profile");
     } finally {
@@ -291,13 +290,28 @@ export default function CreatorsPage() {
               {analysis ? (
                 <div className={styles.analyzerResult}>
                   <div className={styles.resultLabel}>Suggested campaigns for your audience</div>
-                  {suggested.map((item) => (
-                    <div key={item.text} className={styles.resultRow}>
+                  {recommendations.map((item) => (
+                    <Link
+                      key={item.campaignId}
+                      href={`/explore/campaigns/${item.campaignId}`}
+                      className={styles.resultRow}
+                    >
                       <div className={styles.resultDot} />
-                      <div className={styles.resultText}>{item.text}</div>
-                      <div className={styles.resultCpa}>{item.cpaLabel}</div>
-                    </div>
+                      <div className={styles.resultText}>
+                        <strong>{item.productName}</strong> — {item.reason}
+                      </div>
+                      <div className={styles.resultCpa}>
+                        ${(item.cpaAmountCents / 100).toFixed(0)}/conv
+                      </div>
+                    </Link>
                   ))}
+                  {recommendations.length === 0 ? (
+                    <div className={styles.resultRow}>
+                      <div className={styles.resultText}>
+                        No live campaigns matched yet. Browse all verified products while the marketplace grows.
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>

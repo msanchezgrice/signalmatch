@@ -11,7 +11,8 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
   const useCustomShell = pathname === "/" || pathname === "/creators";
   const isCreatorFlow =
     pathname.startsWith("/creators") ||
-    pathname.startsWith("/explore/campaigns");
+    pathname.startsWith("/explore/campaigns") ||
+    pathname.startsWith("/explore/products");
   const flowThemeClass = isCreatorFlow
     ? "app-theme-creator"
     : "app-theme-builder";

@@ -29,14 +29,15 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
     getCreatorDirectory({ limit: 20, offset: 0, verificationStatus: "any" }),
   ]);
 
-  const isFunded = campaign.budget_available_cents > 0;
+  const usesPortfolioCredit = campaign.is_portfolio_owned === true;
+  const isFunded = usesPortfolioCredit || campaign.budget_available_cents > 0;
   const hasInvites = partnerships.length > 0;
   const hasConversions = conversions.length > 0;
   const payout = campaign.cpa_amount_cents / 100;
   const resultLabel = campaign.conversion_type === "signup" ? "approved new account" : "approved qualified result";
   const launchSignals = [
     { label: "Offer defined", done: true },
-    { label: "Campaign funded", done: isFunded },
+    { label: usesPortfolioCredit ? "Portfolio credit active" : "Campaign funded", done: isFunded },
     { label: "Creator invited", done: hasInvites },
     { label: "First result received", done: hasConversions },
   ];
@@ -75,14 +76,13 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
 
       <section className="grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
         <Card className="app-surface">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><CircleDollarSign className="size-5 text-[#087f77]" />1. Fund the creator budget</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><CircleDollarSign className="size-5 text-[#087f77]" />1. {usesPortfolioCredit ? "Portfolio credit" : "Fund the creator budget"}</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div><p className="text-3xl font-semibold">${(campaign.budget_available_cents / 100).toFixed(2)}</p><p className="app-muted-text mt-1 text-sm">available for approved creator results</p></div>
-            <p className="app-muted-text text-sm leading-6">Funding activates this offer. At ${payout.toFixed(0)} per result, $100 covers up to {Math.max(1, Math.floor(100 / Math.max(1, payout)))} approved results.</p>
-            <div className="flex flex-wrap gap-2">
-              {[50, 100, 250].map((amount) => <ActionButton key={amount} label={`Add $${amount}`} action={`/api/builder/campaigns/${id}/fund`} payload={{ amount_cents: amount * 100 }} useIdempotencyKey variant={amount === 100 ? "default" : "outline"} />)}
-            </div>
-            <p className="app-subtle-text text-xs">Stripe opens a secure checkout. Unused budget remains attached to this campaign.</p>
+            {usesPortfolioCredit ? (
+              <><div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4"><p className="font-semibold text-emerald-900">Upfront deposit waived</p><p className="mt-1 text-sm leading-6 text-emerald-800">SignalMatch recognizes this as a trusted portfolio product. Creator payouts accrue through internal portfolio credit, so Stripe funding is not required before invitations.</p></div><p className="app-subtle-text text-xs">This entitlement is set in the database and cannot be enabled from the browser.</p></>
+            ) : (
+              <><div><p className="text-3xl font-semibold">${(campaign.budget_available_cents / 100).toFixed(2)}</p><p className="app-muted-text mt-1 text-sm">available for approved creator results</p></div><p className="app-muted-text text-sm leading-6">Funding activates this offer. At ${payout.toFixed(0)} per result, $100 covers up to {Math.max(1, Math.floor(100 / Math.max(1, payout)))} approved results.</p><div className="flex flex-wrap gap-2">{[50, 100, 250].map((amount) => <ActionButton key={amount} label={`Add $${amount}`} action={`/api/builder/campaigns/${id}/fund`} payload={{ amount_cents: amount * 100 }} useIdempotencyKey variant={amount === 100 ? "default" : "outline"} />)}</div><p className="app-subtle-text text-xs">Stripe opens a secure checkout. Unused budget remains attached to this campaign.</p></>
+            )}
           </CardContent>
         </Card>
 
@@ -156,7 +156,7 @@ export default async function BuilderCampaignDetailPage({ params }: Props) {
       <Card className="app-surface">
         <CardHeader><CardTitle>Creator relationships</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
-          {partnerships.length === 0 ? <p className="app-muted-text rounded-2xl border border-dashed border-[var(--app-border-strong)] p-6 text-center">No invitations yet. Fund the offer, then choose a creator above.</p> : partnerships.map((partnership: any) => <div key={partnership.id} className="flex flex-col gap-2 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between"><span>{partnership.display_name || "Creator"} · {partnership.status}</span><code className="overflow-x-auto rounded-lg bg-[var(--app-muted-surface)] px-2 py-1 font-mono text-xs">/r/{partnership.ref_code}</code></div>)}
+          {partnerships.length === 0 ? <p className="app-muted-text rounded-2xl border border-dashed border-[var(--app-border-strong)] p-6 text-center">No invitations yet. {usesPortfolioCredit ? "Portfolio credit is active—choose a creator above." : "Fund the offer, then choose a creator above."}</p> : partnerships.map((partnership: any) => <div key={partnership.id} className="flex flex-col gap-2 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between"><span>{partnership.display_name || "Creator"} · {partnership.status}</span><code className="overflow-x-auto rounded-lg bg-[var(--app-muted-surface)] px-2 py-1 font-mono text-xs">/r/{partnership.ref_code}</code></div>)}
         </CardContent>
       </Card>
 

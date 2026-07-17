@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUpRight, Search, Sparkles } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Search, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +13,6 @@ export const metadata: Metadata = getMarketingMetadata("/explore/campaigns");
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
-
-function conversionLabel(type: string) {
-  if (type === "activation") {
-    return "Activated account";
-  }
-
-  return "Qualified signup";
-}
 
 export default async function ExploreCampaignsPage({
   searchParams,
@@ -65,12 +57,13 @@ export default async function ExploreCampaignsPage({
       </section>
 
       {data.campaigns.length > 0 ? (
-        <section className="mt-8 overflow-hidden rounded-3xl border border-zinc-200/80 bg-white/95">
+        <section className="mt-8">
           <div className="border-b border-zinc-200/80 px-6 py-4 md:px-8">
             <p className="text-xs font-semibold tracking-[0.16em] text-emerald-700 uppercase">
               Live opportunities
             </p>
           </div>
+          <div className="mt-5 grid gap-6 md:grid-cols-2">
           {data.campaigns.map((campaign) => {
           const tags = (campaign.target_tags as string[]) ?? [];
 
@@ -79,14 +72,25 @@ export default async function ExploreCampaignsPage({
               key={campaign.campaign_id}
               href={`/explore/campaigns/${campaign.campaign_id}`}
             >
-              <article className="grid gap-4 border-b border-zinc-200/80 px-6 py-5 transition last:border-b-0 hover:bg-rose-50/50 md:grid-cols-[1.8fr_0.9fr_0.5fr] md:items-center md:px-8">
-                <div>
-                  <p className="text-lg font-semibold tracking-tight text-zinc-900">
-                    {campaign.title}
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600">
-                    {campaign.product_name}
-                  </p>
+              <article className="group h-full overflow-hidden rounded-[1.75rem] border border-zinc-200 bg-white shadow-[0_18px_60px_rgba(24,24,27,0.08)] transition hover:-translate-y-1 hover:shadow-[0_24px_70px_rgba(24,24,27,0.13)]">
+                <div className="aspect-[16/9] overflow-hidden bg-zinc-100">
+                  {campaign.product_screenshot_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={campaign.product_screenshot_url} alt={`${campaign.product_name} product preview`} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center bg-gradient-to-br from-violet-100 via-white to-orange-100 text-2xl font-semibold text-zinc-700">
+                      {campaign.product_name}
+                    </div>
+                  )}
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm font-semibold text-zinc-600">{campaign.product_name}</p>
+                    {campaign.product_verified_at ? (
+                      <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700"><BadgeCheck className="size-4" /> Website verified</span>
+                    ) : null}
+                  </div>
+                  <p className="mt-2 text-xl font-semibold tracking-tight text-zinc-900">{campaign.title}</p>
                   <p className="mt-2 line-clamp-2 text-sm text-zinc-600">
                     {campaign.brief || "No campaign brief added yet."}
                   </p>
@@ -100,29 +104,16 @@ export default async function ExploreCampaignsPage({
                       </span>
                     ))}
                   </div>
+                  <div className="mt-5 flex items-end justify-between gap-4 border-t border-zinc-100 pt-4">
+                    <div><p className="text-xs text-zinc-500">Per approved outcome</p><p className="text-2xl font-semibold text-zinc-950">${(campaign.cpa_amount_cents / 100).toFixed(0)}</p></div>
+                    <p className="text-sm font-semibold text-violet-700">Review product & terms →</p>
+                  </div>
                 </div>
-
-                <div className="text-sm text-zinc-700">
-                  <p>
-                    <span className="font-medium text-zinc-900">Payout:</span> $
-                    {(campaign.cpa_amount_cents / 100).toFixed(2)} per approved
-                    outcome
-                  </p>
-                  <p className="mt-1">
-                    <span className="font-medium text-zinc-900">
-                      Counts as:
-                    </span>{" "}
-                    {conversionLabel(campaign.conversion_type)}
-                  </p>
-                </div>
-
-                <p className="text-sm font-medium text-zinc-900 md:text-right">
-                  View terms →
-                </p>
               </article>
             </Link>
           );
           })}
+          </div>
         </section>
       ) : query ? (
         <div className="mt-8 rounded-2xl border border-zinc-200 bg-white px-5 py-4 text-sm text-zinc-600">
