@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { ActionButton } from "@/components/forms/actions";
+import { ProductTrackingSetup } from "@/components/builder/product-tracking-setup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthContext } from "@/server/auth";
@@ -38,10 +38,9 @@ export default async function BuilderProductsPage() {
             <CardContent className="space-y-2 text-sm app-muted-text">
               <p>{product.url}</p>
               <p>{product.description || "No description"}</p>
-              <ActionButton
-                label="Generate conversion API key"
-                action={`/api/builder/products/${product.id}/api-key`}
-                variant="outline"
+              <ProductTrackingSetup
+                productId={product.id}
+                hasKey={Boolean(product.conversion_api_key_hash)}
               />
             </CardContent>
           </Card>

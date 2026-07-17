@@ -28,7 +28,7 @@ export async function GET(
   });
 
   const target = new URL(partnership.product_url);
-  target.searchParams.set("utm_source", "curatormarket");
+  target.searchParams.set("utm_source", "signalmatch");
   target.searchParams.set("utm_medium", "creator");
   target.searchParams.set("utm_campaign", partnership.campaign_id);
   target.searchParams.set("ref", refCode);

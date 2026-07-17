@@ -73,6 +73,15 @@ export function ActionButton({
             await navigator.clipboard.writeText(json.api_key as string);
             toast.success("API key copied to clipboard");
           }
+          if (action.includes("/invite") && payload?.creator_user_id) {
+            const campaignId = action.match(/campaigns\/([^/]+)\/invite/)?.[1];
+            if (campaignId) {
+              capture("creator_invited", {
+                campaignId,
+                creatorId: String(payload.creator_user_id),
+              });
+            }
+          }
           router.refresh();
         } catch (error) {
           toast.error(error instanceof Error ? error.message : "Action failed");

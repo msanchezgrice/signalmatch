@@ -3,9 +3,13 @@ import { z } from "zod";
 
 import { requireBuilder } from "@/server/auth";
 import { analyzeSite } from "@/server/lib/site-analyzer";
+import { isHttpWebsiteUrl, normalizeWebsiteUrl } from "@/lib/url";
 
 const schema = z.object({
-  url: z.string().url(),
+  url: z
+    .string()
+    .transform(normalizeWebsiteUrl)
+    .refine(isHttpWebsiteUrl, "Invalid website URL"),
 });
 
 export async function POST(req: NextRequest) {

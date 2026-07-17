@@ -18,10 +18,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAnalytics } from "@/components/providers/analytics-provider";
+import { isHttpWebsiteUrl, normalizeWebsiteUrl } from "@/lib/url";
 
 const schema = z.object({
   name: z.string().min(2),
-  url: z.string().url(),
+  url: z
+    .string()
+    .transform(normalizeWebsiteUrl)
+    .refine(isHttpWebsiteUrl, "Enter a valid website address"),
   description: z.string().optional(),
   category_tags_csv: z.string().optional(),
   pricing_type: z.enum(["free", "freemium", "paid"]).default("freemium"),
@@ -55,11 +59,13 @@ export function ProductForm() {
   });
 
   async function runAnalyzer() {
-    const url = form.getValues("url");
+    const url = normalizeWebsiteUrl(form.getValues("url"));
     if (!url) {
       toast.error("Enter a website URL first");
       return;
     }
+
+    form.setValue("url", url, { shouldDirty: true, shouldValidate: true });
 
     setAnalyzing(true);
     try {
@@ -76,6 +82,7 @@ export function ProductForm() {
 
       const parsed = json.analysis as SiteAnalysis;
       setAnalysis(parsed);
+      capture("product_analyzed", { source: parsed.title ? "website" : "fallback" });
 
       if (!form.getValues("name") && parsed.title) {
         form.setValue("name", parsed.title.trim().slice(0, 80));
@@ -102,6 +109,7 @@ export function ProductForm() {
     try {
       const payload = {
         ...data,
+        url: normalizeWebsiteUrl(data.url),
         category_tags: data.category_tags_csv
           ?.split(",")
           .map((s: string) => s.trim())
@@ -156,9 +164,12 @@ export function ProductForm() {
               </Tooltip>
             </label>
             <Input
-              placeholder="https://yourproduct.com"
+              placeholder="yourproduct.com"
               {...form.register("url")}
             />
+            <p className="app-subtle-text mt-1.5 text-xs">
+              A domain is enough. We add https:// automatically before we scan.
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
