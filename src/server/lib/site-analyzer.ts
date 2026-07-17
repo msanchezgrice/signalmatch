@@ -1,5 +1,10 @@
 import "server-only";
 
+import { assertSafePublicWebsiteUrl } from "@/server/lib/safe-url";
+
+const MAX_RESPONSE_BYTES = 2_000_000;
+const MAX_REDIRECTS = 5;
+
 const stopWords = new Set([
   "the",
   "and",
@@ -173,23 +178,55 @@ export type SiteAnalysis = {
 };
 
 async function tryFetch(url: string, headers?: Record<string, string>) {
-  const response = await fetch(url, {
-    redirect: "follow",
-    signal: AbortSignal.timeout(10_000),
-    headers,
-  });
+  let currentUrl = url;
 
-  if (!response.ok) {
-    throw new Error(`Could not fetch website (${response.status})`);
+  for (let redirectCount = 0; redirectCount <= MAX_REDIRECTS; redirectCount += 1) {
+    await assertSafePublicWebsiteUrl(currentUrl);
+    const response = await fetch(currentUrl, {
+      redirect: "manual",
+      signal: AbortSignal.timeout(10_000),
+      headers,
+    });
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get("location");
+      if (!location || redirectCount === MAX_REDIRECTS) {
+        throw new Error("Website redirected too many times");
+      }
+      currentUrl = new URL(location, currentUrl).toString();
+      continue;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Could not fetch website (${response.status})`);
+    }
+
+    const contentLength = Number(response.headers.get("content-length") || 0);
+    if (contentLength > MAX_RESPONSE_BYTES) {
+      throw new Error("Website response is too large to analyze");
+    }
+
+    const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
+    if (contentType && !contentType.includes("text/html") && !contentType.includes("text/plain") && !contentType.includes("application/xhtml+xml")) {
+      throw new Error("Website did not return readable page content");
+    }
+
+    const bytes = await response.arrayBuffer();
+    if (bytes.byteLength > MAX_RESPONSE_BYTES) {
+      throw new Error("Website response is too large to analyze");
+    }
+
+    return {
+      finalUrl: currentUrl,
+      body: new TextDecoder().decode(bytes),
+    };
   }
 
-  return {
-    finalUrl: response.url,
-    body: await response.text(),
-  };
+  throw new Error("Website redirected too many times");
 }
 
 async function fetchWebsiteContent(inputUrl: string) {
+  await assertSafePublicWebsiteUrl(inputUrl);
   const url = new URL(inputUrl);
   const httpUrl =
     url.protocol === "https:" ? `http://${url.host}${url.pathname}${url.search}` : inputUrl;

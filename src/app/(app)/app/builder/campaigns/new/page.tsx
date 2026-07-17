@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAuthContext } from "@/server/auth";
 import { getBuilderProducts } from "@/server/db/read";
 
-export default async function NewCampaignPage() {
+type Props = { searchParams: Promise<{ goal?: string }> };
+
+export default async function NewCampaignPage({ searchParams }: Props) {
   const authContext = await getAuthContext();
 
   if (!authContext) {
@@ -17,6 +19,7 @@ export default async function NewCampaignPage() {
   }
 
   const products = await getBuilderProducts(authContext.userId);
+  const { goal } = await searchParams;
 
   if (!products.length) {
     redirect("/app/builder/products/new");
@@ -25,14 +28,17 @@ export default async function NewCampaignPage() {
   return (
     <Card className="app-surface">
       <CardHeader>
-        <CardTitle>Create campaign</CardTitle>
+        <CardTitle>Build a performance offer</CardTitle>
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm app-muted-text">
-          Use the guided setup to define conversion quality, approval controls,
-          and budget constraints before inviting creators.
+          Choose the result, explain the audience, and set what a creator earns.
+          You will review funding, tracking, and creator matches before launch.
         </p>
-        <CampaignForm products={products as Array<{ id: string; name: string }>} />
+        <CampaignForm
+          products={products as Array<{ id: string; name: string }>}
+          initialGoal={goal}
+        />
       </CardContent>
     </Card>
   );

@@ -22,8 +22,8 @@ export default async function NewProductPage() {
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm app-muted-text">
-          Start with your website URL to auto-extract messaging, category tags,
-          and likely target personas.
+          Paste your domain—even without https://—and SignalMatch will draft the
+          product story, category, and likely customer audience for you to review.
         </p>
         <ProductForm />
       </CardContent>

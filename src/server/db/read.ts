@@ -70,7 +70,17 @@ export async function getCreatorDirectory(filters: DirectoryFilters) {
       and length(trim(cp.bio)) > 0
       and coalesce(array_length(cp.niches, 1), 0) > 0
       and jsonb_array_length(cp.channels) > 0
-      and ($1::text is null or cp.display_name ilike '%' || $1 || '%')
+      and (
+        $1::text is null
+        or concat_ws(
+          ' ',
+          cp.display_name,
+          cp.bio,
+          array_to_string(cp.niches, ' '),
+          array_to_string(cp.audience_tags, ' '),
+          cp.channels::text
+        ) ilike '%' || $1 || '%'
+      )
       and (
         coalesce(array_length($2::text[], 1), 0) = 0
         or cp.niches && $2::text[]
@@ -84,7 +94,7 @@ export async function getCreatorDirectory(filters: DirectoryFilters) {
         or exists (
           select 1
           from jsonb_array_elements(cp.channels) ch
-          where ch->>'platform' = any($4::text[])
+          where lower(ch->>'platform') = any($4::text[])
         )
       )
       and (
@@ -110,7 +120,7 @@ export async function getCreatorDirectory(filters: DirectoryFilters) {
       filters.query ?? null,
       filters.niches ?? [],
       filters.verificationStatus ?? "any",
-      filters.platforms ?? [],
+      (filters.platforms ?? []).map((platform) => platform.toLowerCase()),
       filters.minFollowers ?? null,
       filters.maxFollowers ?? null,
       limit,
@@ -262,6 +272,35 @@ export async function getBuilderCampaigns(builderUserId: string, status?: string
   );
 
   return rows;
+}
+
+export async function getBuilderLaunchStatus(builderUserId: string) {
+  const { rows } = await sql<{
+    has_product: boolean;
+    has_tracking_key: boolean;
+    has_campaign: boolean;
+    has_funded_campaign: boolean;
+    has_creator_invite: boolean;
+    has_conversion: boolean;
+  }>(
+    `select
+      exists(select 1 from products p where p.owner_user_id = $1) as has_product,
+      exists(select 1 from products p where p.owner_user_id = $1 and p.conversion_api_key_hash is not null) as has_tracking_key,
+      exists(select 1 from campaigns c join products p on p.id = c.product_id where p.owner_user_id = $1) as has_campaign,
+      exists(select 1 from campaigns c join products p on p.id = c.product_id where p.owner_user_id = $1 and c.budget_total_cents > 0) as has_funded_campaign,
+      exists(select 1 from partnerships pr join campaigns c on c.id = pr.campaign_id join products p on p.id = c.product_id where p.owner_user_id = $1) as has_creator_invite,
+      exists(select 1 from conversions cv join partnerships pr on pr.id = cv.partnership_id join campaigns c on c.id = pr.campaign_id join products p on p.id = c.product_id where p.owner_user_id = $1) as has_conversion`,
+    [builderUserId],
+  );
+
+  return rows[0] ?? {
+    has_product: false,
+    has_tracking_key: false,
+    has_campaign: false,
+    has_funded_campaign: false,
+    has_creator_invite: false,
+    has_conversion: false,
+  };
 }
 
 export async function getCampaignPartnershipsForBuilder(

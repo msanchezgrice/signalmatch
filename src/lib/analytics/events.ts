@@ -5,6 +5,10 @@ export type AnalyticsEventMap = {
   sign_in_started: { audience: "builder" | "creator" };
   sign_in_completed: { audience?: "builder" | "creator" };
   role_selected: { role: "BUILDER" | "CREATOR" };
+  ftue_started: { audience: "builder" | "creator" };
+  goal_selected: { goal: string };
+  ftue_completed: { audience: "builder" | "creator"; goal: string };
+  product_analyzed: { source?: string };
   product_created: { productId: string };
   campaign_created: { campaignId: string; productId?: string };
   checkout_started: { campaignId: string };

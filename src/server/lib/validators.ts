@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { isHttpWebsiteUrl, normalizeWebsiteUrl } from "@/lib/url";
+
 export const roleSchema = z.enum(["CREATOR", "BUILDER"]);
 
 export const creatorProfileSchema = z.object({
@@ -23,7 +25,10 @@ export const creatorProfileSchema = z.object({
 
 export const productSchema = z.object({
   name: z.string().min(2),
-  url: z.string().url(),
+  url: z
+    .string()
+    .transform(normalizeWebsiteUrl)
+    .refine(isHttpWebsiteUrl, "Enter a valid website address"),
   description: z.string().max(1000).optional(),
   category_tags: z.array(z.string()).default([]),
   pricing_type: z.enum(["free", "freemium", "paid"]).default("freemium"),
