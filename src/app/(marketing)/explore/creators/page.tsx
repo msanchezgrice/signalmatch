@@ -6,6 +6,7 @@ import { Search, UsersRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getMarketingMetadata } from "@/lib/marketing-metadata";
+import { showcaseCreators } from "@/lib/showcase-creators";
 import { getCreatorDirectory } from "@/server/db/read";
 import type { CreatorChannel } from "@/server/db/types";
 
@@ -69,16 +70,17 @@ export default async function ExploreCreatorsPage({ searchParams }: PageProps) {
 
       <div className="mt-8 overflow-hidden rounded-3xl border border-zinc-200/80 bg-white/90">
         {data.creators.length === 0 ? (
-          <div className="flex flex-col items-center px-6 py-14 text-center md:px-8">
+          <div className="flex flex-col items-center px-6 py-8 text-center md:px-8">
             <span className="grid size-12 place-items-center rounded-2xl bg-orange-100 text-orange-700">
               <UsersRound className="size-5" aria-hidden="true" />
             </span>
             <h2 className="mt-4 text-lg font-semibold tracking-tight">
-              No creators matched this search
+              {query || niche ? "No live creators matched this search" : "The verified creator directory is opening soon"}
             </h2>
             <p className="mt-2 max-w-md text-sm leading-6 text-zinc-600">
-              Try a broader name, niche, or audience term. New creator profiles
-              are added as they are reviewed.
+              {query || niche
+                ? "Try a broader name, niche, or audience term."
+                : "Explore the example creator bench below to see the audience and channel evidence builders will be able to compare."}
             </p>
             {query || niche ? (
               <Button asChild variant="outline" className="mt-5">
@@ -145,6 +147,46 @@ export default async function ExploreCreatorsPage({ searchParams }: PageProps) {
           </Link>
         ))}
       </div>
+
+      <section className="mt-10">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.16em] text-orange-700 uppercase">Example creator bench</p>
+            <h2 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">Preview the creators software brands want to meet.</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-zinc-600">
+              These fictional profiles demonstrate audience fit and channel evidence. They are examples—not creators currently available for invitation.
+            </p>
+          </div>
+          <Link href="/creators/sign-up" className="text-sm font-semibold text-zinc-900 hover:text-orange-700">Join the live directory →</Link>
+        </div>
+
+        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {showcaseCreators.map((creator) => (
+            <Link
+              key={creator.id}
+              href={`/explore/creators/example-${creator.id}`}
+              className="group rounded-[1.75rem] border border-zinc-200 bg-white p-5 shadow-[0_16px_50px_rgba(24,24,27,0.07)] transition hover:-translate-y-1 hover:border-orange-200 hover:shadow-[0_24px_70px_rgba(24,24,27,0.11)]"
+            >
+              <div className="flex items-start gap-4">
+                <Image src={creator.avatarUrl} alt={creator.displayName} width={64} height={64} unoptimized className="size-16 rounded-2xl bg-orange-50 object-cover" />
+                <div className="min-w-0 flex-1">
+                  <span className="rounded-full bg-orange-50 px-2 py-1 text-[9px] font-semibold tracking-wide text-orange-700 uppercase">Illustrative example</span>
+                  <h3 className="mt-2 truncate text-xl font-semibold tracking-tight text-zinc-950">{creator.displayName}</h3>
+                  <p className="text-xs text-zinc-500">{creator.handle} · {creator.channels[0]?.platform}</p>
+                </div>
+              </div>
+              <p className="mt-4 line-clamp-2 text-sm leading-6 text-zinc-600">{creator.bio}</p>
+              <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl bg-zinc-50 p-3 text-xs">
+                <div><p className="text-zinc-400">Average reach</p><p className="mt-1 font-semibold text-zinc-800">{creator.averageReach}</p></div>
+                <div><p className="text-zinc-400">Suggested payout</p><p className="mt-1 line-clamp-2 font-semibold text-zinc-800">{creator.suggestedPayout}</p></div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {creator.niches.slice(0, 3).map((tag) => <span key={tag} className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] text-orange-800">{tag}</span>)}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
