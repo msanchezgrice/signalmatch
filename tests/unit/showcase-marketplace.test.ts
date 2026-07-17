@@ -44,6 +44,7 @@ describe("showcase creator inventory", () => {
 
     for (const creator of showcaseCreators) {
       expect(creator.example).toBe(true);
+      expect(creator.avatarUrl).toMatch(/^\/creators\/profiles\/[a-z-]+\.webp$/);
       expect(creator.bio.length).toBeGreaterThan(40);
       expect(creator.niches.length).toBeGreaterThanOrEqual(2);
       expect(creator.channels.length).toBeGreaterThan(0);

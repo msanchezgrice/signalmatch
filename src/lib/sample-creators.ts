@@ -23,7 +23,7 @@ export const sampleCreators: SampleCreator[] = [
     averageReach: "18K–32K",
     matchScore: 94,
     suggestedPayout: "$35–$55 per paid signup",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=MayaChen",
+    avatarUrl: "/creators/profiles/maya-chen.webp",
     reasons: ["Founder-heavy audience", "Hands-on product walkthroughs", "Strong signup intent"],
   },
   {
@@ -36,7 +36,7 @@ export const sampleCreators: SampleCreator[] = [
     averageReach: "12K–18K",
     matchScore: 91,
     suggestedPayout: "$25–$45 per qualified signup",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=JordanEllis",
+    avatarUrl: "/creators/profiles/jordan-ellis.webp",
     reasons: ["B2B software buyers", "Weekly tool recommendations", "High email click intent"],
   },
   {
@@ -49,7 +49,7 @@ export const sampleCreators: SampleCreator[] = [
     averageReach: "35K–60K",
     matchScore: 88,
     suggestedPayout: "$12–$24 per activated user",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=NiaBrooks",
+    avatarUrl: "/creators/profiles/nia-brooks.webp",
     reasons: ["Fast product demonstrations", "AI-curious audience", "Consistent comment activity"],
   },
   {
@@ -62,7 +62,7 @@ export const sampleCreators: SampleCreator[] = [
     averageReach: "8K–16K",
     matchScore: 86,
     suggestedPayout: "$40–$70 per booked demo",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=TheoMartin",
+    avatarUrl: "/creators/profiles/theo-martin.webp",
     reasons: ["Decision-maker audience", "Detailed workflow posts", "B2B buying context"],
   },
   {
@@ -75,7 +75,7 @@ export const sampleCreators: SampleCreator[] = [
     averageReach: "21K–34K",
     matchScore: 83,
     suggestedPayout: "$18–$32 per qualified signup",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=SofiaReyes",
+    avatarUrl: "/creators/profiles/sofia-reyes.webp",
     reasons: ["Small-business audience", "Saveable workflow content", "Strong story engagement"],
   },
   {
@@ -88,7 +88,7 @@ export const sampleCreators: SampleCreator[] = [
     averageReach: "26K–44K",
     matchScore: 81,
     suggestedPayout: "$30–$50 per activated account",
-    avatarUrl: "https://api.dicebear.com/9.x/notionists/svg?seed=DevonPark",
+    avatarUrl: "/creators/profiles/devon-park.webp",
     reasons: ["Implementation-focused videos", "Tool-buying audience", "Evergreen search traffic"],
   },
 ];
