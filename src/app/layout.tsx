@@ -38,6 +38,13 @@ export default function RootLayout({
   return (
     <ClerkProvider publishableKey={env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
       <html lang="en">
+        <head>
+          <script
+            src="https://analytics.ahrefs.com/analytics.js"
+            data-key="FRzkepTedKN7vwJ/TO4CcQ"
+            async
+          />
+        </head>
         <body
           className={`${spaceGrotesk.variable} ${ibmPlexMono.variable} bg-background text-foreground font-sans antialiased`}
         >
