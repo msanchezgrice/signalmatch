@@ -1,0 +1,40 @@
+{
+  "name": "SignalMatch",
+  "description": "Builder-first marketplace for CPA-based creator campaigns. Builders define a conversion event, set a CPA rate and budget, and invite creators; payouts release only after the builder approves each verified conversion.",
+  "url": "https://www.signalmatch.me",
+  "provider": {
+    "organization": "SignalMatch",
+    "url": "https://www.signalmatch.me"
+  },
+  "version": "1.0.0",
+  "capabilities": [],
+  "skills": [
+    {
+      "id": "search-creators",
+      "name": "Search creators",
+      "description": "Find creator profiles by niche, audience tags, platform, and follower range via the public directory, public JSON API (/api/public/creators), or the MCP search_creators tool."
+    },
+    {
+      "id": "browse-campaigns",
+      "name": "Browse campaigns",
+      "description": "List and inspect open CPA campaigns via the public directory, public JSON API (/api/public/campaigns), or MCP campaign tools."
+    },
+    {
+      "id": "track-conversions",
+      "name": "Track conversions",
+      "description": "Submit idempotent conversion events for a funded campaign via POST /api/conversions with a builder API key."
+    }
+  ],
+  "interfaces": {
+    "mcp": "https://www.signalmatch.me/mcp",
+    "llms_txt": "https://www.signalmatch.me/llms.txt",
+    "agents_md": "https://www.signalmatch.me/agents.md",
+    "guardrails": "https://www.signalmatch.me/.well-known/ai-agent.json",
+    "sitemap": "https://www.signalmatch.me/sitemap.xml"
+  },
+  "authentication": {
+    "mcp": "OAuth 2.0 via Clerk (see /.well-known/oauth-protected-resource/mcp)",
+    "public_apis": "none (read-only)",
+    "conversion_api": "builder API key"
+  }
+}

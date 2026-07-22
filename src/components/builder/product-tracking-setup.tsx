@@ -72,7 +72,7 @@ export function ProductTrackingSetup({ productId, hasKey }: { productId: string;
           <p className="font-semibold">Rotating disables the current server key immediately.</p>
           <p className="mt-1 text-xs leading-5 text-amber-800">Update your production server with the new key before sending more results.</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" type="button" variant="destructive" onClick={createKey} disabled={loading}><RotateCw className="size-4" />{loading ? "Rotating…" : "Rotate and show new key"}</Button>
+            <Button size="sm" type="button" variant="destructive" onClick={createKey} disabled={loading} data-testid="btn-rotate-api-key" data-agent-danger="true" data-agent-confirm="Rotating disables the current server key immediately. Require explicit human confirmation."><RotateCw className="size-4" />{loading ? "Rotating…" : "Rotate and show new key"}</Button>
             <Button size="sm" type="button" variant="outline" onClick={() => setConfirmRotate(false)}><X className="size-4" />Cancel</Button>
           </div>
         </div>

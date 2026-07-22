@@ -1,0 +1,37 @@
+# SignalMatch
+
+> SignalMatch is a builder-first marketplace where product teams run CPA-based campaigns with creators: builders define a conversion event and pay per approved conversion, and creators earn per verified outcome they drive.
+
+## Product
+
+- [Home](https://www.signalmatch.me/): Overview of the CPA creator marketplace, how campaigns work, and FAQ.
+- [For builders](https://www.signalmatch.me/builders): How product teams launch CPA campaigns and recruit creators.
+- [For creators](https://www.signalmatch.me/creators): How creators browse campaigns and get paid per verified conversion.
+- [Creator success stories](https://www.signalmatch.me/creators/success-stories): Case studies from creators.
+- [About](https://www.signalmatch.me/about): About the product and team.
+- [Contact](https://www.signalmatch.me/contact): Contact page (email: msanchezgrice@gmail.com).
+
+## Directories (public, read-only)
+
+- [Creator directory](https://www.signalmatch.me/explore/creators): Browse creator profiles with niches, audience tags, and channel evidence.
+- [Campaign directory](https://www.signalmatch.me/explore/campaigns): Browse open CPA campaigns.
+- [Product directory](https://www.signalmatch.me/explore/products): Browse products running campaigns.
+
+## Docs and resources
+
+- [Resources](https://www.signalmatch.me/resources): Editorial guides on creator campaigns, attribution, and CPA pricing.
+- [Tools](https://www.signalmatch.me/tools): Free tools for campaign planning.
+- [agents.md](https://www.signalmatch.me/agents.md): Guidance for AI agents interacting with this site.
+
+## For AI agents
+
+- [Agent card (A2A)](https://www.signalmatch.me/.well-known/agent-card.json): Machine-readable agent manifest.
+- [ai-agent.json](https://www.signalmatch.me/.well-known/ai-agent.json): Guardrails, allowed and disallowed agent actions.
+- MCP server: `https://www.signalmatch.me/mcp` (streamable HTTP, OAuth via Clerk). Read tools include `search_creators` and campaign directory queries; builder-scoped tools require authentication.
+- Public read APIs: `/api/public/creators`, `/api/public/campaigns` (GET, JSON).
+- Conversion events: `POST /api/conversions` (idempotent, API-key authenticated; for builders integrating attribution).
+
+## Legal
+
+- [Privacy policy](https://www.signalmatch.me/privacy)
+- [Terms of service](https://www.signalmatch.me/terms)

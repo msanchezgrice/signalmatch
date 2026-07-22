@@ -1,0 +1,49 @@
+{
+  "name": "SignalMatch",
+  "description": "Builder-first marketplace for CPA-based creator campaigns. Builders define conversion events, set CPA rates and budgets, and approve each conversion before payout; creators earn per verified outcome.",
+  "url": "https://www.signalmatch.me",
+  "version": "1.0.0",
+  "contact": "msanchezgrice@gmail.com",
+  "docs": {
+    "llms_txt": "https://www.signalmatch.me/llms.txt",
+    "agents_md": "https://www.signalmatch.me/agents.md",
+    "agent_card": "https://www.signalmatch.me/.well-known/agent-card.json",
+    "sitemap": "https://www.signalmatch.me/sitemap.xml"
+  },
+  "interfaces": {
+    "mcp": {
+      "url": "https://www.signalmatch.me/mcp",
+      "transport": "streamable-http",
+      "auth": "OAuth 2.0 via Clerk"
+    },
+    "public_apis": [
+      "GET /api/public/creators",
+      "GET /api/public/creators/{id}",
+      "GET /api/public/campaigns",
+      "GET /api/public/campaigns/{id}"
+    ],
+    "conversion_api": "POST /api/conversions (idempotent, builder API key required)"
+  },
+  "guardrails": {
+    "allowed_actions": [
+      "Read any public page: /, /builders, /creators, /explore/*, /resources/*, /tools, /about, /contact, /privacy, /terms",
+      "Query the public read-only JSON APIs under /api/public/*",
+      "Use read-only MCP tools such as search_creators and campaign directory queries",
+      "Navigate using links and buttons tagged with data-agent-action"
+    ],
+    "requires_human_confirmation": [
+      "Submitting any sign-up or sign-in form",
+      "Funding a campaign or changing campaign budget or CPA terms",
+      "Approving a conversion or releasing a payout",
+      "Rotating API keys or any action tagged data-agent-danger / data-agent-confirm"
+    ],
+    "disallowed_actions": [
+      "Creating accounts, campaigns, or conversion events without the account owner's explicit instruction",
+      "Fabricating, replaying, or duplicating conversion events",
+      "Accessing authenticated /app/* pages without the user's own session and consent",
+      "Modifying pricing, payout, or payment settings",
+      "Scraping private user data or bypassing rate limits"
+    ],
+    "notes": "Payment and payout actions are irreversible and must always be confirmed by a human. When in doubt, stop and ask the user."
+  }
+}
