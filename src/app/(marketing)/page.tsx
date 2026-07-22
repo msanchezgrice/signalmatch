@@ -93,13 +93,34 @@ const faqs = [
   },
 ];
 
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.q,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: faq.a,
+    },
+  })),
+};
+
 export default function HomePage() {
   return (
     <div className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <a className={styles.skipLink} href="#main-content">
         Skip to content
       </a>
-      <nav className={styles.nav} aria-label="Primary navigation">
+      <nav
+        className={styles.nav}
+        aria-label="Primary navigation"
+        data-agent-nav="primary"
+      >
         <Link href="/" className={styles.navLogo}>
           <Image src="/brand/signalmatch-mark.png" alt="" width={28} height={28} priority />
           SignalMatch
@@ -125,6 +146,8 @@ export default function HomePage() {
           <Link
             href="/builders/sign-up"
             className={`${styles.btn} ${styles.btnPrimary}`}
+            data-testid="cta-nav-builder-signup"
+            data-agent-action="sign-up-builder"
           >
             Find creators →
           </Link>
@@ -153,6 +176,8 @@ export default function HomePage() {
             <Link
               href="/builders/sign-up"
               className={`${styles.btn} ${styles.btnPrimary} ${styles.btnLg}`}
+              data-testid="cta-hero-find-creators"
+              data-agent-action="sign-up-builder"
             >
               Find creators now
               <svg className={styles.arrow} viewBox="0 0 14 14" fill="none">
@@ -168,6 +193,8 @@ export default function HomePage() {
             <Link
               href="/explore/creators"
               className={`${styles.btn} ${styles.btnGhost} ${styles.btnLg}`}
+              data-testid="cta-hero-explore-creators"
+              data-agent-action="explore-creators"
             >
               Explore creator directory
             </Link>
@@ -455,6 +482,8 @@ export default function HomePage() {
                   href="/builders/sign-up"
                   className={`${styles.btn} ${styles.btnPrimary} ${styles.btnLg}`}
                   style={{ width: "100%", justifyContent: "center" }}
+                  data-testid="cta-builder-signup"
+                  data-agent-action="sign-up-builder"
                 >
                   Start as a builder →
                 </Link>
@@ -474,6 +503,8 @@ export default function HomePage() {
                     justifyContent: "center",
                     color: "var(--text)",
                   }}
+                  data-testid="cta-creator-join"
+                  data-agent-action="join-creator"
                 >
                   Join as a creator →
                 </Link>
@@ -498,6 +529,12 @@ export default function HomePage() {
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
             <Link href="/contact">Contact</Link>
+            <a href="/llms.txt" data-testid="link-llms-txt">
+              llms.txt
+            </a>
+            <a href="/agents.md" data-testid="link-agents-md">
+              agents.md
+            </a>
           </div>
         </div>
       </footer>

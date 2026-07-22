@@ -5,6 +5,24 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   allowedDevOrigins: ["http://127.0.0.1:3000", "http://127.0.0.1:3100"],
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'self'",
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

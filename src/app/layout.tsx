@@ -10,6 +10,31 @@ import { env } from "@/server/env";
 
 import "./globals.css";
 
+const siteUrl = "https://www.signalmatch.me";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: "SignalMatch",
+      url: siteUrl,
+      logo: `${siteUrl}/brand/signalmatch-mark.png`,
+      email: "msanchezgrice@gmail.com",
+      description:
+        "Builder-first marketplace for CPA-based creator campaigns. Builders define a conversion event, set a CPA rate and budget, and pay only for approved conversions.",
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: "SignalMatch",
+      url: siteUrl,
+      publisher: { "@id": `${siteUrl}/#organization` },
+    },
+  ],
+};
+
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
@@ -60,6 +85,10 @@ export default function RootLayout({
             }}
           >
             <TooltipProvider>
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+              />
               {children}
               <Toaster richColors />
             </TooltipProvider>
